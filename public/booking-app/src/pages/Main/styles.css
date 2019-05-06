@@ -1,0 +1,18 @@
+#Header{
+    background-color: #722ed1;
+}
+#Menu{
+    background-color: #722ed1;
+    color: white;
+}
+#Main-Container{
+    padding: '0 25px';
+}
+.Menu-Item{
+    font-size: 1000;
+}
+.Search-Container{
+    background-color: white;
+    min-height: 80px;
+    padding: 0 20px;
+}
