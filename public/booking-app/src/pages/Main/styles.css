@@ -6,13 +6,29 @@
     color: white;
 }
 #Main-Container{
-    padding: '0 25px';
+    padding: 12px 100px;
+    background: #F0F2F5;
+    min-height: 8105;
 }
 .Menu-Item{
-    font-size: 1000;
 }
-.Search-Container{
+.Search-Inner-Container{
     background-color: white;
-    min-height: 80px;
+    min-height: 60px;
     padding: 0 20px;
+}
+.Search-Outter-Container{
+    background-color: green;
+    padding: 0 100px;
+    min-height: 60px;
+    align-items: center;
+
+}
+.Col-Container{
+    text-align: center;
+    background-color: antiquewhite;
+    min-height: 40px;
+    line-height: 40px;
+    color: #262626;
+
 }

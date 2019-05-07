@@ -28,35 +28,23 @@ export default class Main extends Component {
             <Menu.Item className="Menu-Item" key="1">Reservas</Menu.Item>
           </Menu>
         </Header>
-        <Content id="Main-Container">
-          <div style={{ background: '#F0F2F5', padding: 24, minHeight: 815 }}>
-          
-          <div className = "Search-Container">
-          <Row type="flex" justify="center" gutter={8}>
-          <Col span={12}>
-          <div>
-          <Row type="flex" justify="center" gutter={8}>
-          <Col spawn={4}>
-          <p>Local</p>
-          </Col>
-          <Col spawn={4}>
-          <Input placeholder="input with clear icon" allowClear onChange={this.onChange} />
-          </Col>
-          <Col spawn={4}>
-            <Button type="dashed" icon="search">Search</Button>
-          </Col>
-          
-          </Row>
-            
-          
-          </div>
-          
-          </Col>
-          </Row>
-          
+        <Content id = "Main-Container">
+          <div style={{ background: '#F0F2F5', padding: 24, minHeight: 815 }} >
+         
+            <Row className = "Search-Outter-Container" type="flex" justify="center" gutter={8}>
 
-
-          </div>
+             
+                  <Col className = "Col-Container" spawn={4}>
+                    Local
+                  </Col>
+                  <Col className = "Col-Container" spawn={4}>
+                    <Input placeholder="input with clear icon" allowClear onChange={this.onChange} />
+                  </Col>
+                  <Col className = "Col-Container" spawn={4}>
+                    <Button type="dashed" icon="search">Search</Button>
+                  </Col>
+             
+            </Row>
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
