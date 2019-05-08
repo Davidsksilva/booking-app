@@ -26,6 +26,13 @@
     
 
 }
+#Hotel-Table{
+    min-height: 60px;
+    align-items: center;
+    width: 1360px;
+    background-color: white;
+    margin-top: 40px;
+}
 .Col-Container{
     text-align: center;
     background-color: white;
