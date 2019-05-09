@@ -1,3 +1,8 @@
+
+#Page{
+    background: #F0F2F5;
+    height: 100%;
+}
 #Header{
     background-color: #1890ff;
 }
@@ -7,9 +12,9 @@
 }
 #Main-Container{
     padding: 20px 100px;
-    background: #F0F2F5;
-    min-height: 8105;
+    height: 100%;
 }
+
 .Menu-Item{
 }
 .Search-Inner-Container{
@@ -42,14 +47,15 @@
  
     
 }
-#Content-Container{
-
+#List-Header{
+    font-weight: 600
 }
+
 #Package-Container{
     min-height: 60px;
     line-height: 60px;
     min-width: 200px;
-    font-weight: 700;
+    font-weight: 600;
     border-right: solid;
     border-width: 2px;
     border-color: #1890ff;
@@ -61,3 +67,33 @@
 #Input-Alert{
     width: 1360px;
 }
+
+.Hotel-List-Container{
+ 
+}
+.Hotel-List-Item-Row{
+    width: 100%;
+    height: 40px;
+ }
+
+.Hotel-List-Item-Col{
+   flex-basis: 400px;
+   margin-right: 50px;
+}
+.Hotel-List-Item-Col-Location{
+    flex-basis: 100px;
+    margin-right: 50px;
+ }
+
+ #Steps-Row{
+     margin-top: 20px;
+     width: 1360px;
+ }
+ #Steps-Col{
+     flex-basis: 50%;
+     margin: 0 0;
+     padding: 0 0;
+ }
+ #List{
+     height: 560px;
+ }
