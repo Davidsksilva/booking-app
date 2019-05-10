@@ -76,13 +76,19 @@
     height: 40px;
  }
 
-.Hotel-List-Item-Col{
-   flex-basis: 400px;
-   margin-right: 50px;
+.Hotel-List-Item-Col-Stars{
+    flex-basis: 10%;
+    
+}
+.Hotel-List-Item-Col-Name{
+   flex-basis: 30%;
 }
 .Hotel-List-Item-Col-Location{
-    flex-basis: 100px;
-    margin-right: 50px;
+    flex-basis: 30%;
+
+ }
+ .Hotel-List-Item-Col-Button{
+    flex-basis: 30%;
  }
 
  #Steps-Row{

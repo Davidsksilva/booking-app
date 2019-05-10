@@ -22,7 +22,9 @@ import {
   Card,
   Typography,
   Steps,
-  message
+  message,
+  Modal,
+  Radio
 } from "antd";
 import "antd/dist/antd.css";
 import "./styles.css";
@@ -63,8 +65,12 @@ const placesList = [
 
 const steps = [
   {
-    title: "Selecionar Quarto",
+    title: "Selecionar Hotel",
     content: "First-content"
+  },
+  {
+    title: "Selecionar Quarto",
+    content: "Second-content"
   },
   {
     title: "Selecionar Vôo",
@@ -84,14 +90,53 @@ export default class Main extends Component {
     this.setState({ current: value });
   }
 
+  listBedrooms = async (hotel_id,hotel_name) =>{
+    const value = this.state.current + 1;
+    this.setState({ current: value });
+    this.setState({selectedHotelId: hotel_id});
+    this.setState({selectedHotelName: hotel_name})
+    this.setState({ listDataSource: [] });
+    axios
+      .get(`http://localhost:9090/hoteis/${hotel_id}/quartos?occupation=free`)
+      .then(response => {
+        let bedroom_list = response.data._embedded.bedroomList;
+        bedroom_list.map(bedroom => {
+          let bedroom_data = {
+            key: bedroom.number,
+            num_beds: bedroom.num_beds,
+            price: bedroom.price
+          };
+
+          console.log(bedroom_data)
+          this.setState({
+            listDataSource: [...this.state.listDataSource, bedroom_data]
+          });
+
+          //console.log(hotel_data);
+        });
+      })
+      .catch(error => {})
+      .finally(() => {
+        this.setState({
+          show: true,
+        })
+      });
+
+
+  }
+
   prev() {
     const value = this.state.current - 1;
     this.setState({ current: value });
+
+    if(value == 0){
+      this.makeRequest();
+    }
   }
 
   state = {
     current: 0,
-    hotelDataSource: [],
+    listDataSource: [],
     hotelColumns: [
       {
         title: "Nome",
@@ -113,6 +158,12 @@ export default class Main extends Component {
     origin: "AC",
     error: false,
     show: false,
+    bedroomModalVisible: false,
+    selectedHotelId : 0,
+    selectedHotelName: "",
+    selectedBedroomNum: 0,
+    
+
   };
 
   generateDestOptions = () => {};
@@ -127,6 +178,27 @@ export default class Main extends Component {
     });
   };
 
+  showBedrooms = hotel_id =>{
+    this.setState({
+      bedroomModalVisible: true,
+    });
+
+  }
+
+  handleOk = (e) => {
+    console.log(e);
+    this.setState({
+      bedroomModalVisible: false,
+    });
+  }
+
+  handleCancel = (e) => {
+    console.log(e);
+    this.setState({
+      bedroomModalVisible: false,
+    });
+  }
+
   handleChangeOrigin = value => {
     this.setState({
       origin: value
@@ -136,7 +208,7 @@ export default class Main extends Component {
   };
 
   makeRequest = async () => {
-    this.setState({ hotelDataSource: [] });
+    this.setState({ listDataSource: [] });
     axios
       .get(`http://localhost:9090/hoteis?location=${this.state.destination}`)
       .then(response => {
@@ -151,7 +223,37 @@ export default class Main extends Component {
 
           //console.log(hotel_data)
           this.setState({
-            hotelDataSource: [...this.state.hotelDataSource, hotel_data]
+            listDataSource: [...this.state.listDataSource, hotel_data]
+          });
+
+          console.log(hotel_data);
+        });
+      })
+      .catch(error => {})
+      .finally(() => {
+        this.setState({
+          show: true,
+        })
+      });
+  };
+
+  loadBedrooms = async () => {
+    this.setState({ listDataSource: [] });
+    axios
+      .get(`http://localhost:9090/hoteis?location=${this.state.destination}`)
+      .then(response => {
+        let hotel_list = response.data._embedded.bedroomList;
+        hotel_list.map(hotel => {
+          let hotel_data = {
+            key: hotel.id,
+            name: "Hotel " + hotel.name,
+            state: hotel.state,
+            stars: hotel.stars
+          };
+
+          //console.log(hotel_data)
+          this.setState({
+            listDataSource: [...this.state.listDataSource, hotel_data]
           });
 
           console.log(hotel_data);
@@ -185,7 +287,7 @@ export default class Main extends Component {
     return stars;
   };
 
-  //<Table dataSource={this.state.hotelDataSource} columns={this.state.hotelColumns} />
+  //<Table dataSource={this.state.listDataSource} columns={this.state.hotelColumns} />
   render() {
     return (
       <div id="Page">
@@ -324,6 +426,9 @@ export default class Main extends Component {
                   <Col id = "Steps-Col" align="start" >
                     <Steps current={this.state.current}>
                       <Step
+                        title="Selecionar Hotel"
+                      />
+                       <Step
                         title="Selecionar Quarto"
                       />
                       <Step
@@ -345,11 +450,15 @@ export default class Main extends Component {
                     split
                     size="large"
                     itemLayout="vertical"
-                    header={<div id="List-Header">Lista de Hotéis</div>}
+                    header={<div id="List-Header">
+                    
+                    {this.state.current == 0?`Hotéis em ${this.state.destination}`:
+                    `Quartos disponíveis em ${this.state.selectedHotelName}`}
+                      </div>}
                     bordered
-                    dataSource={this.state.hotelDataSource}
+                    dataSource={this.state.listDataSource}
                     renderItem={item => (
-                      <List.Item className="Hotel-List-Container">
+                      <List.Item key= {item.key}className="Hotel-List-Container">
                         <Row
                           className="Hotel-List-Item-Row"
                           type="flex"
@@ -357,17 +466,20 @@ export default class Main extends Component {
                           align="middle"
                           gutter={8}
                         >
-                          <Col className="Hotel-List-Item-Col" spawn={4}>
-                            {item.name}
+                          <Col className="Hotel-List-Item-Col-Name" spawn={6}>
+                            {this.state.current == 0?item.name: `Quarto número ${item.key}`}
                           </Col>
                           <Col
                             className="Hotel-List-Item-Col-Location"
-                            spawn={4}
+                            spawn={6}
                           >
-                            {item.state}
+                            {this.state.current == 0?item.state: `${item.num_beds} camas no quarto`}
                           </Col>
-                          <Col className="Hotel-List-Item-Col-Stars" spawn={4}>
-                            {this.renderStars(item.stars)}
+                          <Col className="Hotel-List-Item-Col-Stars" spawn={6}>
+                            {this.state.current == 0?this.renderStars(item.stars): `R$ ${item.price} p/ noite`}
+                          </Col>
+                          <Col className="Hotel-List-Item-Col-Button" type="flex" align="end"spawn={6}>
+                          <Button type="primary" onClick={() => this.listBedrooms(item.key,item.name)}>{this.state.current == 0?"Selecionar Hotel":"Selecionar Quarto"}</Button>
                           </Col>
                         </Row>
                       </List.Item>
@@ -378,11 +490,6 @@ export default class Main extends Component {
                 {this.state.show &&<Row>
                   <Col>
                     <div className="steps-action">
-                      {this.state.current < steps.length - 1 && (
-                        <Button type="primary" onClick={() => this.next()}>
-                          Next
-                        </Button>
-                      )}
                       {this.state.current === steps.length - 1 && (
                         <Button
                           type="primary"
@@ -398,7 +505,7 @@ export default class Main extends Component {
                           style={{ marginLeft: 8 }}
                           onClick={() => this.prev()}
                         >
-                          Previous
+                        {this.state.current == 1? "Voltar para Hotéis":"Voltar"}
                         </Button>
                       )}
                     </div>
