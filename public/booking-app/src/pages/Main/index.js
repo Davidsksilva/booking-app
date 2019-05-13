@@ -1,7 +1,7 @@
 import React, { Component, ImageBackground } from "react";
 import axios from "axios";
 
-import background from "../../assets/background.jpg"
+import background from "../../assets/background.jpg";
 import {
   Layout,
   Menu,
@@ -30,9 +30,9 @@ import {
 import "antd/dist/antd.css";
 import "./styles.css";
 
-
-import PageHeader from "./components/PageHeader"
-import SearchBox from "./components/SearchBox"
+import PageHeader from "./components/PageHeader";
+import SearchBox from "./components/SearchBox";
+import UserForm from "./components/UserForm";
 
 const { Header, Content, Footer } = Layout;
 const { MonthPicker, RangePicker, WeekPicker } = DatePicker;
@@ -90,96 +90,6 @@ const steps = [
 // App's Main Page
 export default class Main extends Component {
 
-  next() {
-    const value = this.state.current + 1;
-    this.setState({ current: value });
-  }
-
-  selectedPressed = async (item_key, hotel_name) => {
-
-    // If a hotel has been selected
-    if(this.state.current == 0){
-
-    this.setState({ selectedHotelId: item_key });
-    this.setState({ selectedHotelName: hotel_name })
-    this.setState({ listDataSource: [] });
-    axios
-      .get(`http://localhost:9090/hoteis/${item_key}/quartos?occupation=free`)
-      .then(response => {
-        let bedroom_list = response.data._embedded.bedroomList;
-        bedroom_list.map(bedroom => {
-          let bedroom_data = {
-            key: bedroom.number,
-            num_beds: bedroom.num_beds,
-            price: bedroom.price
-          };
-
-          console.log(bedroom_data)
-          this.setState({
-            listDataSource: [...this.state.listDataSource, bedroom_data]
-          });
-
-          //console.log(hotel_data);
-        });
-      })
-      .catch(error => { })
-      .finally(() => {
-        this.setState({
-          show: true,
-        })
-      });
-    }
-
-    // If a room has been selected
-    else if(this.state.current == 1){
-      
-      this.setState({ selectedBedroomNum: item_key });
-      this.setState({ listDataSource: [] });
-      axios
-        .get(`http://localhost:8080/voos/quartos?origin=${this.state.origin}&destination=${this.state.destination}`)
-        .then(response => {
-          let flight_list = response.data._embedded.flightList;
-          flight_list.map(flight=> {
-            let flight_data = {
-              key: flight.id,
-              code: flight.code,
-              depart_time: flight.departure_time,
-              flight_day: flight.flight_day,
-              seats_left: flight.seats - flight.taken_seats,
-              company_name: flight.company.name,
-              price: flight.price
-            };
-  
-            this.setState({
-              listDataSource: [...this.state.listDataSource, flight_data]
-            });
-  
-            //console.log(hotel_data);
-          });
-        })
-        .catch(error => { })
-        .finally(() => {
-          this.setState({
-            show: true,
-          })
-        });
-      }
-      
-    
-
-    const value = this.state.current + 1;
-    this.setState({ current: value });
-  }
-
-  prev() {
-    const value = this.state.current - 1;
-    this.setState({ current: value });
-
-    if (value == 0) {
-      this.makeRequest();
-    }
-  }
-
   state = {
     current: 0,
     listDataSource: [],
@@ -204,13 +114,137 @@ export default class Main extends Component {
     origin: "AC",
     error: false,
     show: false,
+    showList: false,
+    showSteps: false,
+    showUserForm: false,
     bedroomModalVisible: false,
     selectedHotelId: 0,
     selectedHotelName: "",
-    selectedBedroomNum: 0,
+    selectedBedroomNum: 0
   };
 
-  generateDestOptions = () => { };
+
+  next() {
+    const value = this.state.current + 1;
+    this.setState({ current: value });
+  }
+
+  selectedPressed = async (item_key, hotel_name) => {
+    // If a hotel has been selected
+    if (this.state.current == 0) {
+      this.setState({ selectedHotelId: item_key });
+      this.setState({ selectedHotelName: hotel_name });
+      this.setState({ listDataSource: [] });
+      axios
+        .get(`http://localhost:9090/hoteis/${item_key}/quartos?occupation=free`)
+        .then(response => {
+          let bedroom_list = response.data._embedded.bedroomList;
+          bedroom_list.map(bedroom => {
+            let bedroom_data = {
+              key: bedroom.number,
+              num_beds: bedroom.num_beds,
+              price: bedroom.price
+            };
+
+            console.log(bedroom_data);
+            this.setState({
+              listDataSource: [...this.state.listDataSource, bedroom_data]
+            });
+
+            //console.log(hotel_data);
+          });
+        })
+        .catch(error => {})
+        .finally(() => {
+          this.setState({
+            show: true,
+            showList: true,
+            showSteps:true,
+          });
+        });
+    }
+
+    // If a room has been selected
+    else if (this.state.current == 1) {
+      this.setState({ selectedBedroomNum: item_key });
+      this.setState({ listDataSource: [] });
+      axios
+        .get(
+          `http://localhost:8080/voos?origin=${
+            this.state.origin
+          }&destination=${this.state.destination}`
+        )
+        .then(response => {
+          let flight_list = response.data._embedded.flightList;
+          flight_list.map(flight => {
+            let day;
+            if(flight.flight_day == "Monday"){
+              day = "Segunda-Feira"
+            }
+            else{
+              day = "Sexta-feira"
+            }
+            let flight_data = {
+              key: flight.id,
+              code: flight.code,
+              depart_time: flight.departure_time,
+              flight_day: day,
+              seats_left: flight.seats - flight.taken_seats,
+              company_name: flight.company.name,
+              price: flight.price
+            };
+
+            console.log(flight_list)
+            this.setState({
+              listDataSource: [...this.state.listDataSource, flight_data]
+            });
+
+            //console.log(hotel_data);
+          });
+        })
+        .catch(error => {})
+        .finally(() => {
+          this.setState({
+            show: true,
+            showList: true,
+            showSteps:true,
+          });
+        });
+    }
+    else if(this.state.current == 2){
+      this.setState({ listDataSource: [] });
+      this.setState({
+        showList: false,
+        showSteps:true
+      })
+      this.setState({showUserForm: true})
+      let book_data = {
+       
+      };
+
+      this.setState({
+        listDataSource: [...this.state.listDataSource, book_data]
+      });
+
+    }
+
+    const value = this.state.current + 1;
+    this.setState({ current: value });
+  };
+
+  prev() {
+    const value = this.state.current - 1;
+    this.setState({ current: value });
+
+    if (value == 0) {
+      this.makeRequest();
+    }
+    else if(value == 1){
+      this.requestBedrooms();
+    }
+  }
+
+  generateDestOptions = () => {};
 
   onChange = e => {
     console.log(e);
@@ -224,24 +258,23 @@ export default class Main extends Component {
 
   showBedrooms = hotel_id => {
     this.setState({
-      bedroomModalVisible: true,
+      bedroomModalVisible: true
     });
+  };
 
-  }
-
-  handleOk = (e) => {
+  handleOk = e => {
     console.log(e);
     this.setState({
-      bedroomModalVisible: false,
+      bedroomModalVisible: false
     });
-  }
+  };
 
-  handleCancel = (e) => {
+  handleCancel = e => {
     console.log(e);
     this.setState({
-      bedroomModalVisible: false,
+      bedroomModalVisible: false
     });
-  }
+  };
 
   handleChangeOrigin = value => {
     this.setState({
@@ -273,41 +306,40 @@ export default class Main extends Component {
           console.log(hotel_data);
         });
       })
-      .catch(error => { })
+      .catch(error => {})
       .finally(() => {
         this.setState({
           show: true,
-        })
+          showList: true,
+          showSteps:true,
+        });
       });
   };
 
-  loadBedrooms = async () => {
+  requestBedrooms = async () => {
     this.setState({ listDataSource: [] });
     axios
-      .get(`http://localhost:9090/hoteis?location=${this.state.destination}`)
+      .get(`http://localhost:9090/hoteis/${this.state.selectedHotelId}/quartos?occupation=free`)
       .then(response => {
-        let hotel_list = response.data._embedded.bedroomList;
-        hotel_list.map(hotel => {
-          let hotel_data = {
-            key: hotel.id,
-            name: "Hotel " + hotel.name,
-            state: hotel.state,
-            stars: hotel.stars
+        let bedroom_list = response.data._embedded.bedroomList;
+        bedroom_list.map(bedroom => {
+          let bedroom_data = {
+            key: bedroom.number,
+            num_beds: bedroom.num_beds,
+            price: bedroom.price
           };
 
-          //console.log(hotel_data)
+          console.log(bedroom_data);
           this.setState({
-            listDataSource: [...this.state.listDataSource, hotel_data]
+            listDataSource: [...this.state.listDataSource, bedroom_data]
           });
-
-          console.log(hotel_data);
         });
       })
-      .catch(error => { })
+      .catch(error => {})
       .finally(() => {
         this.setState({
-          show: true,
-        })
+          show: true
+        });
       });
   };
 
@@ -318,7 +350,6 @@ export default class Main extends Component {
   onClose = e => {
     console.log(e, "I was closed.");
   };
-
 
   renderStars = stars_num => {
     const stars = [];
@@ -332,74 +363,169 @@ export default class Main extends Component {
     return stars;
   };
 
-  renderListTitle = () =>{
-    switch(this.state.current){
+  renderListTitle = () => {
+    switch (this.state.current) {
       case 0:
         return `Hotéis em ${this.state.destination}`;
       case 1:
-       return `Quartos disponíveis em ${this.state.selectedHotelName}`;
+        return `Quartos disponíveis em ${this.state.selectedHotelName}`;
       case 2:
         return `Vôos de ${this.state.origin} para ${this.state.destination}`;
     }
+  };
 
-  }
+  renderListItemCol = item => {
 
-  renderListItemCol = (item)=>{
+    // Display hotel column data
+    if(this.state.current == 0){
+      return (
+        <Row
+          className="Hotel-List-Item-Row"
+          type="flex"
+          justify="start"
+          align="middle"
+          gutter={8}
+        >
+          <Col className="Hotel-List-Item-Col-Name" spawn={6}>
+            {item.name}
+          </Col>
+          <Col className="Hotel-List-Item-Col-Location" spawn={6}>
+            {item.state}
+          </Col>
+          <Col className="Hotel-List-Item-Col-Stars" spawn={6}>
+            {this.renderStars(item.stars)}
+          </Col>
+          <Col
+            className="Hotel-List-Item-Col-Button"
+            type="flex"
+            align="end"
+            spawn={6}
+          >
+            <Button
+              type="primary"
+              onClick={() =>
+                this.selectedPressed(item.key, item.name)
+              }
+            > 
+              {this.renderButtonName()}
+            </Button>
+          </Col>
+        </Row>
+      );
+    }
+    // Display bedrooms  column data
+    else if(this.state.current == 1){
 
-    return(
-      <div>
-        <Col className="Hotel-List-Item-Col-Name" spawn={6}>
-                            {this.state.current == 0 ? item.name : `Quarto número ${item.key}`}
-                          </Col>
-                          <Col
-                            className="Hotel-List-Item-Col-Location"
-                            spawn={6}
-                          >
-                            {this.state.current == 0 ? item.state : `${item.num_beds} camas no quarto`}
-                          </Col>
-                          <Col className="Hotel-List-Item-Col-Stars" spawn={6}>
-                            {this.state.current == 0 ? this.renderStars(item.stars) : `R$ ${item.price} p/ noite`}
-                          </Col>
-        </div>
-    )
-  }
+      return(
+        <Row
+          className="Hotel-List-Item-Row"
+          type="flex"
+          justify="start"
+          align="middle"
+          gutter={8}
+        >
+          <Col className="Hotel-List-Item-Col-Name" spawn={6}>
+            {`Quarto número ${item.key}`}
+          </Col>
+          <Col className="Hotel-List-Item-Col-Location" spawn={6}>
+            {`${item.num_beds} camas no quarto`}
+          </Col>
+          <Col className="Hotel-List-Item-Col-Stars" spawn={6}>
+            {`R$ ${item.price} p/ noite`}
+          </Col>
+          <Col
+            className="Hotel-List-Item-Col-Button"
+            type="flex"
+            align="end"
+            spawn={6}
+          >
+            <Button
+              type="primary"
+              onClick={() =>
+                this.selectedPressed(item.key, item.name)
+              }
+            >
+              {this.renderButtonName()}
+            </Button>
+          </Col>
+        </Row>
+      );
+    }
+    // Display flight column data
+    else if (this.state.current == 2){
+      return(
+        <Row
+          className="Hotel-List-Item-Row"
+          type="flex"
+          justify="start"
+          align="middle"
+          gutter={8}
+        >
+          <Col className="Hotel-List-Item-Col-Code" spawn={6}>
+            {`Vôo ${item.code}`}
+          </Col>
+          <Col className="List-Item-Col-Company" spawn={6}>
+            {`${item.company_name}`}
+          </Col>
+          <Col className="List-Item-Col-Departure" spawn={6}>
+            {`${item.flight_day} ${item.depart_time}`}
+          </Col>
+          <Col className="Hotel-List-Item-Col-Stars" spawn={6}>
+            {`R$ ${item.price} p/ pessoa`}
+          </Col>
+          <Col
+            className="Hotel-List-Item-Col-Button"
+            type="flex"
+            align="end"
+            spawn={6}
+          >
+            <Button
+              type="primary"
+              onClick={() =>
+                this.selectedPressed(item.key, item.name)
+              }
+            >
+              {this.renderButtonName()}
+            </Button>
+          </Col>
+        </Row>
+      );
+    }
+    
+  };
 
-  renderButtonName = () =>{
-
-    switch(this.state.current){
+  renderButtonName = () => {
+    switch (this.state.current) {
       case 0:
         return "Selecionar Hotel";
       case 1:
-       return "Selecionar Quarto";
+        return "Selecionar Quarto";
       case 2:
         return "Selecionar Vôo";
     }
-
-  }
+  };
 
   render() {
     return (
       <div id="Page">
-      
         <Layout id="Layout">
-
           <PageHeader />
 
           <Content id="Main-Container">
-            <div style={{ padding: 0, height: "100%" , width: "100%"}}>
-
+            <div id = "Background-Image" style={{ padding: 0, height: "100%", width: "100%" }}>
               <Col
                 id="Content-Container"
                 type="flex"
                 justify="start"
                 align="center"
               >
-                <SearchBox 
-                searchFunction={this.makeRequest} 
-                destination={this.state.destination} 
-                origin={this.state.origin} 
-                handleChangeDestination={this.handleChangeDestination}
-                handleChangeOrigin={this.handleChangeOrigin}/>
+                <SearchBox
+                  searchFunction={this.makeRequest}
+                  destination={this.state.destination}
+                  origin={this.state.origin}
+                  handleChangeDestination={this.handleChangeDestination}
+                  handleChangeOrigin={this.handleChangeOrigin}
+                />
 
                 {this.state.error ? (
                   <Row id="Input-Alert">
@@ -412,97 +538,88 @@ export default class Main extends Component {
                     />
                   </Row>
                 ) : (
-                    ""
-                  )}
+                  ""
+                )}
 
-                {this.state.show && <Row type="flex" justify="center" id="Steps-Row">
-                  <Col id="Steps-Col" align="start" >
-                    <Steps current={this.state.current}>
-                      <Step
-                        title="Selecionar Hotel"
-                      />
-                      <Step
-                        title="Selecionar Quarto"
-                      />
-                      <Step
-                        title="Selecionar Vôo"
-                      />
-                      <Step title="Confirmar Dados" />
-                    </Steps>
+                {this.state.showSteps && (
+                  <Row type="flex" justify="center" id="Steps-Row">
+                    <Col id="Steps-Col" align="start">
+                      <Steps current={this.state.current}>
+                        <Step title="Selecionar Hotel" />
+                        <Step title="Selecionar Quarto" />
+                        <Step title="Selecionar Vôo" />
+                        <Step title="Confirmar Dados" />
+                      </Steps>
+                    </Col>
+                  </Row>
+                )}
+                {this.state.showUserForm && (
+                  <Row  type="flex" justify="center" className="Hotel-Table">
+                  <Col type="flex" className="Hotel-Table" justify="start">
+                  <UserForm/>
                   </Col>
-                </Row>}
-                {this.state.show && <Row id="Hotel-Table">
-                  <List
-                    id="List"
-                    pagination={{
-                      onChange: page => {
-                        console.log(page);
-                      },
-                      pageSize: 6
-                    }}
-                    split
-                    size="large"
-                    itemLayout="vertical"
-                    header={<div id="List-Header">
-
-                      {this.renderListTitle()}
-                    </div>}
-                    bordered
-                    dataSource={this.state.listDataSource}
-                    renderItem={item => (
-                      <List.Item key={item.key} className="Hotel-List-Container">
-                        <Row
-                          className="Hotel-List-Item-Row"
-                          type="flex"
-                          justify="start"
-                          align="middle"
-                          gutter={8}
+                  
+                  </Row>
+                 
+                )}
+                {this.state.showList && (
+                  <Row className="Hotel-Table">
+                    <List
+                      id="List"
+                      pagination={{
+                        onChange: page => {
+                          console.log(page);
+                        },
+                        pageSize: 6
+                      }}
+                      split
+                      size="large"
+                      itemLayout="vertical"
+                      header={
+                        <div id="List-Header">{this.renderListTitle()}</div>
+                      }
+                      bordered
+                      dataSource={this.state.listDataSource}
+                      renderItem={item => (
+                        <List.Item
+                          key={item.key}
+                          className="Hotel-List-Container"
                         >
-                          <Col className="Hotel-List-Item-Col-Name" spawn={6}>
-                            {this.state.current == 0 ? item.name : `Quarto número ${item.key}`}
-                          </Col>
-                          <Col
-                            className="Hotel-List-Item-Col-Location"
-                            spawn={6}
+                          {this.renderListItemCol(item)}
+                        </List.Item>
+                      )}
+                    />
+                  </Row>
+                )}
+
+                {this.state.showSteps && (
+                  <Row>
+                    <Col>
+                      <div className="steps-action">
+                        {this.state.current === steps.length - 1 && (
+                          <Button
+                            type="primary"
+                            onClick={() =>
+                              message.success("Processing complete!")
+                            }
                           >
-                            {this.state.current == 0 ? item.state : `${item.num_beds} camas no quarto`}
-                          </Col>
-                          <Col className="Hotel-List-Item-Col-Stars" spawn={6}>
-                            {this.state.current == 0 ? this.renderStars(item.stars) : `R$ ${item.price} p/ noite`}
-                          </Col>
-                          <Col className="Hotel-List-Item-Col-Button" type="flex" align="end" spawn={6}>
-                            <Button type="primary" onClick={() => this.selectedPressed(item.key, item.name)}>{this.renderButtonName()}</Button>
-                          </Col>
-                        </Row>
-                      </List.Item>
-                    )}
-                  />
-                </Row>}
-
-                {this.state.show && <Row>
-                  <Col>
-                    <div className="steps-action">
-                      {this.state.current === steps.length - 1 && (
-                        <Button
-                          type="primary"
-                          onClick={() =>
-                            message.success("Processing complete!")
-                          }
-                        >
-                          Done
-                        </Button>
-                      )}
-                      {this.state.current > 0 && (
-                        <Button
-                          style={{ marginLeft: 8 }}
-                          onClick={() => this.prev()}
-                        >
-                          {this.state.current == 1 ? "Voltar para Hotéis" : "Voltar"}
-                        </Button>
-                      )}
-                    </div>
-                  </Col>
-                </Row>}
+                            Done
+                          </Button>
+                        )}
+                        {this.state.current > 0 && (
+                          <Button
+                            style={{ marginLeft: 8 }}
+                            onClick={() => this.prev()}
+                          >
+                            {this.state.current == 1
+                              ? "Voltar para Hotéis"
+                              : "Voltar"}
+                          </Button>
+                        )}
+                      </div>
+                    </Col>
+                  </Row>
+                )}
               </Col>
             </div>
           </Content>

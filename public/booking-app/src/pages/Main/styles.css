@@ -22,7 +22,11 @@
     background-repeat: no-repeat; /* Do not repeat the image */
     background-size: cover; /* Resize the background image to cover the entire container */
     background-image: url("../../assets/background_grey.jpg");
-    
+    background-image: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.2) 100%), url("../../assets/background_grey.jpg");
+ 
+  
+}
+#Backgruond-Image{
     
 }
 
@@ -38,9 +42,8 @@
     width: 1360px;
     background-color: white;
     
-
 }
-#Hotel-Table{
+.Hotel-Table{
     min-height: 60px;
     align-items: center;
     width: 1360px;
@@ -92,6 +95,15 @@
 .Hotel-List-Item-Col-Name{
    flex-basis: 30%;
 }
+.Hotel-List-Item-Col-Code{
+    flex-basis: 20%;
+ }
+.List-Item-Col-Company{
+    flex-basis: 25%;
+ }
+ .List-Item-Col-Departure{
+    flex-basis: 15%;
+ }
 .Hotel-List-Item-Col-Location{
     flex-basis: 30%;
 
