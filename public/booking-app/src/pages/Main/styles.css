@@ -21,7 +21,7 @@
     background-position: center; /* Center the image */
     background-repeat: no-repeat; /* Do not repeat the image */
     background-size: cover; /* Resize the background image to cover the entire container */
-    background-image: url("../../assets/background.jpg");
+    background-image: url("../../assets/background_grey.jpg");
     
     
 }

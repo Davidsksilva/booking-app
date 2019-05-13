@@ -95,14 +95,16 @@ export default class Main extends Component {
     this.setState({ current: value });
   }
 
-  listBedrooms = async (hotel_id, hotel_name) => {
-    const value = this.state.current + 1;
-    this.setState({ current: value });
-    this.setState({ selectedHotelId: hotel_id });
+  selectedPressed = async (item_key, hotel_name) => {
+
+    // If a hotel has been selected
+    if(this.state.current == 0){
+
+    this.setState({ selectedHotelId: item_key });
     this.setState({ selectedHotelName: hotel_name })
     this.setState({ listDataSource: [] });
     axios
-      .get(`http://localhost:9090/hoteis/${hotel_id}/quartos?occupation=free`)
+      .get(`http://localhost:9090/hoteis/${item_key}/quartos?occupation=free`)
       .then(response => {
         let bedroom_list = response.data._embedded.bedroomList;
         bedroom_list.map(bedroom => {
@@ -126,8 +128,47 @@ export default class Main extends Component {
           show: true,
         })
       });
+    }
 
+    // If a room has been selected
+    else if(this.state.current == 1){
+      
+      this.setState({ selectedBedroomNum: item_key });
+      this.setState({ listDataSource: [] });
+      axios
+        .get(`http://localhost:8080/voos/quartos?origin=${this.state.origin}&destination=${this.state.destination}`)
+        .then(response => {
+          let flight_list = response.data._embedded.flightList;
+          flight_list.map(flight=> {
+            let flight_data = {
+              key: flight.id,
+              code: flight.code,
+              depart_time: flight.departure_time,
+              flight_day: flight.flight_day,
+              seats_left: flight.seats - flight.taken_seats,
+              company_name: flight.company.name,
+              price: flight.price
+            };
+  
+            this.setState({
+              listDataSource: [...this.state.listDataSource, flight_data]
+            });
+  
+            //console.log(hotel_data);
+          });
+        })
+        .catch(error => { })
+        .finally(() => {
+          this.setState({
+            show: true,
+          })
+        });
+      }
+      
+    
 
+    const value = this.state.current + 1;
+    this.setState({ current: value });
   }
 
   prev() {
@@ -167,8 +208,6 @@ export default class Main extends Component {
     selectedHotelId: 0,
     selectedHotelName: "",
     selectedBedroomNum: 0,
-
-
   };
 
   generateDestOptions = () => { };
@@ -293,6 +332,51 @@ export default class Main extends Component {
     return stars;
   };
 
+  renderListTitle = () =>{
+    switch(this.state.current){
+      case 0:
+        return `Hotéis em ${this.state.destination}`;
+      case 1:
+       return `Quartos disponíveis em ${this.state.selectedHotelName}`;
+      case 2:
+        return `Vôos de ${this.state.origin} para ${this.state.destination}`;
+    }
+
+  }
+
+  renderListItemCol = (item)=>{
+
+    return(
+      <div>
+        <Col className="Hotel-List-Item-Col-Name" spawn={6}>
+                            {this.state.current == 0 ? item.name : `Quarto número ${item.key}`}
+                          </Col>
+                          <Col
+                            className="Hotel-List-Item-Col-Location"
+                            spawn={6}
+                          >
+                            {this.state.current == 0 ? item.state : `${item.num_beds} camas no quarto`}
+                          </Col>
+                          <Col className="Hotel-List-Item-Col-Stars" spawn={6}>
+                            {this.state.current == 0 ? this.renderStars(item.stars) : `R$ ${item.price} p/ noite`}
+                          </Col>
+        </div>
+    )
+  }
+
+  renderButtonName = () =>{
+
+    switch(this.state.current){
+      case 0:
+        return "Selecionar Hotel";
+      case 1:
+       return "Selecionar Quarto";
+      case 2:
+        return "Selecionar Vôo";
+    }
+
+  }
+
   render() {
     return (
       <div id="Page">
@@ -361,8 +445,7 @@ export default class Main extends Component {
                     itemLayout="vertical"
                     header={<div id="List-Header">
 
-                      {this.state.current == 0 ? `Hotéis em ${this.state.destination}` :
-                        `Quartos disponíveis em ${this.state.selectedHotelName}`}
+                      {this.renderListTitle()}
                     </div>}
                     bordered
                     dataSource={this.state.listDataSource}
@@ -388,7 +471,7 @@ export default class Main extends Component {
                             {this.state.current == 0 ? this.renderStars(item.stars) : `R$ ${item.price} p/ noite`}
                           </Col>
                           <Col className="Hotel-List-Item-Col-Button" type="flex" align="end" spawn={6}>
-                            <Button type="primary" onClick={() => this.listBedrooms(item.key, item.name)}>{this.state.current == 0 ? "Selecionar Hotel" : "Selecionar Quarto"}</Button>
+                            <Button type="primary" onClick={() => this.selectedPressed(item.key, item.name)}>{this.renderButtonName()}</Button>
                           </Col>
                         </Row>
                       </List.Item>

@@ -4,6 +4,7 @@
     background-color: white;
     min-height: 60px;
     padding: 0 20px;
+    
 }
 .Search-Outter-Container{
 
@@ -35,7 +36,7 @@
     margin-right: 20px; 
 }
 
-@media screen and (max-width: 4500px){
+@media screen and (max-width: 450px){
     #Package-Container{
         display: none;
     }

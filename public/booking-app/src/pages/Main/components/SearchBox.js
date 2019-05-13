@@ -135,7 +135,7 @@ export default class SearchBox extends Component {
                                 <Button
                                     type="dashed"
                                     icon="search"
-                                    onClick={this.props.makeRequest}
+                                    onClick={this.props.searchFunction}
                                 >
                                     Buscar
                         </Button>
