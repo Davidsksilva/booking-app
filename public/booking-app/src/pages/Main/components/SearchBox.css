@@ -1,0 +1,42 @@
+
+
+.Search-Inner-Container{
+    background-color: white;
+    min-height: 60px;
+    padding: 0 20px;
+}
+.Search-Outter-Container{
+
+    min-height: 60px;
+    align-items: center;
+    width: 90%;
+    background-color: white;
+
+}
+.Col-Container{
+    text-align: center;
+    background-color: white;
+    min-height: 60px;
+    line-height: 60px;
+    color: #262626;
+}
+#List-Header{
+    font-weight: 600
+}
+
+#Package-Container{
+    min-height: 60px;
+    line-height: 60px;
+    min-width: 200px;
+    font-weight: 600;
+    border-right: solid;
+    border-width: 2px;
+    border-color: #1890ff;
+    margin-right: 20px; 
+}
+
+@media screen and (max-width: 4500px){
+    #Package-Container{
+        display: none;
+    }
+  }

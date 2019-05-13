@@ -1,22 +1,31 @@
 
 #Page{
-    background: #F0F2F5;
     height: 100%;
+    background-color: #f0f2f5;
+    width: 100%;
+    
 }
-#Header{
-    background-color: #1890ff;
+
+#Layout{
+    
+    
+    height: 100%;
+    width: 100%;
 }
-#Menu{
-    background-color: #1890ff;
-    color: white;
-}
+
 #Main-Container{
     padding: 20px 100px;
     height: 100%;
+    width: 100%;
+    display: block;
+    background-position: center; /* Center the image */
+    background-repeat: no-repeat; /* Do not repeat the image */
+    background-size: cover; /* Resize the background image to cover the entire container */
+    background-image: url("../../assets/background.jpg");
+    
+    
 }
 
-.Menu-Item{
-}
 .Search-Inner-Container{
     background-color: white;
     min-height: 60px;
