@@ -69,14 +69,16 @@ export default class Main extends Component {
     origin: "AC",
     error: false,
     show: false,
+    num_guests: 1,
     showList: false,
     showSteps: false,
     showUserForm: false,
     showInfo: false,
     bedroomModalVisible: false,
-    selectedHotelId: 0,
+    selectedHotelId: null,
     selectedHotelName: "",
-    selectedBedroomNum: 0
+    selectedBedroomNum: null,
+    disableSearch: false,
   };
 
 
@@ -85,6 +87,33 @@ export default class Main extends Component {
     this.setState({ current: value });
   }
 
+  onNumberGuestsChange = (value) =>{
+    this.setState({num_guests: value })
+  }
+  handleReload = async () =>{
+    this.setState({
+      selectedBedroomNum: null,
+      selectedHotelId: null,
+      selectedHotelName: "",
+      disableSearch: false,
+      showInfo: false,
+      showUserForm: false,
+      showSteps: false,
+      showList: false,
+      current: 0,
+      destination: "AL",
+      origin: "AC",
+      num_guests: null
+    });
+
+
+  }
+  handleSearch = async (destination) =>{
+
+    this.setState({disableSearch: true})
+    this.requestHotels(destination);
+  }
+  
   selectedPressed = async (item_key, hotel_name) => {
     // If a hotel has been selected
     if (this.state.current === 0) {
@@ -255,7 +284,7 @@ export default class Main extends Component {
   requestBedrooms = async (hotel_id) => {
     this.setState({ listDataSource: [] });
     axios
-      .get(`http://localhost:9090/hoteis/${hotel_id}/quartos?occupation=free`)
+      .get(`http://localhost:9090/hoteis/${hotel_id}/quartos?occupation=free&min_beds=${this.state.num_guests}`)
       .then(response => {
         let bedroom_list = response.data._embedded.bedroomList;
         bedroom_list.map(bedroom => {
@@ -368,7 +397,7 @@ export default class Main extends Component {
             {`Quarto número ${item.key}`}
           </Col>
           <Col className="Hotel-List-Item-Col-Location" spawn={6}>
-            {`${item.num_beds} camas no quarto`}
+            {`${item.num_beds} cama(s) no quarto`}
           </Col>
           <Col className="Hotel-List-Item-Col-Stars" spawn={6}>
             {`R$ ${item.price} p/ noite`}
@@ -460,7 +489,10 @@ export default class Main extends Component {
                 align="center"
               >
                 <SearchBox
-                  searchFunction={this.requestHotels}
+                  searchFunction={this.handleSearch}
+                  reloadFunction={this.handleReload}
+                  onNumberGuestsChange={this.onNumberGuestsChange}
+                  disableSearch={this.state.disableSearch}
                   destination={this.state.destination}
                   origin={this.state.origin}
                   handleChangeDestination={this.handleChangeDestination}
@@ -493,7 +525,8 @@ export default class Main extends Component {
 
                
                 {this.state.showUserForm && (
-                  <UserForm/>
+                  <UserForm
+                  numGuests = {this.state.num_guests}/>
                 )}
 
                 {this.state.showList && (

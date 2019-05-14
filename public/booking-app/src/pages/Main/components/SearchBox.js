@@ -65,6 +65,7 @@ export default class SearchBox extends Component {
                                     showSearch
                                     size="default"
                                     allowClear
+                                    disabled = {this.props.disableSearch}
                                     placeholder="Local"
                                     optionFilterProp="children"
                                     onChange={this.props.handleChangeOrigin}
@@ -92,7 +93,7 @@ export default class SearchBox extends Component {
                                 <Select
                                     showSearch
                                     size="default"
-
+                                    disabled = {this.props.disableSearch}
                                     placeholder="Local"
                                     optionFilterProp="children"
                                     onChange={this.props.handleChangeDestination}
@@ -117,7 +118,7 @@ export default class SearchBox extends Component {
                             </Col>
                             <Col className="Col-Container">Período</Col>
                             <Col className="Col-Container">
-                                <RangePicker locale={locale} onChange={this.onChange} />
+                                <RangePicker locale={locale} onChange={this.onChange} disabled = {this.props.disableSearch} />
                             </Col>
                             <Col className="Col-Container">Qtde. Hóspedes</Col>
                             <Col className="Col-Container">
@@ -125,17 +126,29 @@ export default class SearchBox extends Component {
                                     min={1}
                                     max={10}
                                     defaultValue={1}
-                                    onChange={this.onChange}
+                                    disabled = {this.props.disableSearch}
+                                    onChange={(value)=> this.props.onNumberGuestsChange(value)}
                                 />
                             </Col>
-                            <Col className="Col-Container" id="End">
+                            <Col className="Col-Container">
                                 <Button
-                                    type="dashed"
+                                    type="primary"
                                     icon="search"
+                                    disabled = {this.props.disableSearch}
                                     onClick={() => this.props.searchFunction(this.props.destination)}
                                 >
                                     Buscar
-                        </Button>
+                                </Button>
+                            </Col>
+
+                            <Col className="Col-Container" id="End">
+                                <Button
+                                    type="dashed"
+                                    icon="reload"
+                                    onClick={() => this.props.reloadFunction()}
+                                >
+                                    Resetar
+                                </Button>
                             </Col>
                         </Row>
                     </Col>

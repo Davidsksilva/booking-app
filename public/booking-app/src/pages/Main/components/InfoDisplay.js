@@ -8,7 +8,6 @@ export default class InfoDisplay extends Component {
     return (
       <Row type="flex" justify="start" id="Info-Row">
 
-        oi
         
       </Row>
     )
