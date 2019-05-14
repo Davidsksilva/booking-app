@@ -1,8 +1,6 @@
 import React, { Component } from 'react'
-import axios from "axios";
 
 import {
-    Layout,
     DatePicker,
     Row,
     Col,
@@ -11,11 +9,10 @@ import {
     Select,
 } from "antd";
 import "antd/dist/antd.css";
-import "./SearchBox.css"
+import "./components.css"
 import locale from "antd/lib/date-picker/locale/pt_BR";
 
-const { Header, Content, Footer } = Layout;
-const { MonthPicker, RangePicker, WeekPicker } = DatePicker;
+const {RangePicker} = DatePicker;
 const Option = Select.Option;
 
 const placesList = [
@@ -135,7 +132,7 @@ export default class SearchBox extends Component {
                                 <Button
                                     type="dashed"
                                     icon="search"
-                                    onClick={this.props.searchFunction}
+                                    onClick={() => this.props.searchFunction(this.props.destination)}
                                 >
                                     Buscar
                         </Button>

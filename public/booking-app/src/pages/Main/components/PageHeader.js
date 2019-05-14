@@ -2,9 +2,9 @@ import React, { Component } from 'react'
 
 import { Layout, Menu } from "antd";
 import "antd/dist/antd.css";
-import "./PageHeader.css";
+import "./components.css";
 
-const { Header, Content, Footer } = Layout;
+const { Header} = Layout;
 export default class PageHeader extends Component {
     render() {
         return (
