@@ -9,6 +9,7 @@ import {
   Icon,
   Alert,
   Steps,
+  message 
 } from "antd";
 import "antd/dist/antd.css";
 import "./styles.css";
@@ -16,10 +17,12 @@ import "./styles.css";
 import PageHeader from "./components/PageHeader";
 import SearchBox from "./components/SearchBox";
 import UserForm from "./components/UserForm";
-import ListDisplay from "./components/ListDisplay"
-import StepsAction from "./components/StepsAction"
-import StepsDisplay from "./components/StepsDisplay"
-import InfoDisplay from "./components/InfoDisplay"
+import ListDisplay from "./components/ListDisplay";
+import StepsAction from "./components/StepsAction";
+import StepsDisplay from "./components/StepsDisplay";
+import InfoDisplay from "./components/InfoDisplay";
+import PackageDisplay from "./components/PackageDisplay";
+
 
 const {Content} = Layout;
 const Step = Steps.Step;
@@ -37,7 +40,12 @@ const steps = [
     content: "Second-content"
   },
   {
-    title: "Confirmação dos Dados",
+    title: "Inserir Dadados",
+    content: "Third-content"
+  }
+  ,
+  {
+    title: "Confirmar Pacote",
     content: "Last-content"
   }
 ];
@@ -70,15 +78,20 @@ export default class Main extends Component {
     error: false,
     show: false,
     num_guests: 1,
+    guests_name: [],
+    guests_gender: [],
+    guests_age: [],
     showList: false,
     showSteps: false,
     showUserForm: false,
     showInfo: false,
+    showPackage: false,
     bedroomModalVisible: false,
     selectedHotelId: null,
     selectedHotelName: "",
     selectedBedroomNum: null,
     disableSearch: false,
+
   };
 
 
@@ -99,14 +112,33 @@ export default class Main extends Component {
       showInfo: false,
       showUserForm: false,
       showSteps: false,
+      showPackage: false,
       showList: false,
       current: 0,
       destination: "AL",
       origin: "AC",
-      num_guests: null
+      num_guests: 1
     });
 
 
+  }
+
+  handlePackageConfirmation = () =>{
+
+    message.success("Pacote encomendado com sucesso!");
+    axios.post(`http://localhost:7070/reservas`, {
+      hotelId: this.state.selectedHotelId,
+      bedroomNum: this.state.selectedBedroomNum,
+      flightId: this.state.selectedFlightId
+    })
+    .then(function (response) {
+      let booking_href = response.data._links.self.href;
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+
+    this.handleReload();
   }
   handleSearch = async (destination) =>{
 
@@ -114,37 +146,42 @@ export default class Main extends Component {
     this.requestHotels(destination);
   }
   
-  selectedPressed = async (item_key, hotel_name) => {
+  selectedPressed = async (item_key, item) => {
     // If a hotel has been selected
     if (this.state.current === 0) {
       this.setState({ selectedHotelId: item_key });
-      this.setState({ selectedHotelName: hotel_name });
+      this.setState({ selectedHotelName: item.name });
       this.requestBedrooms(item_key);
     }
 
     // If a room has been selected
     else if (this.state.current == 1) {
-      this.setState({ selectedBedroomNum: item_key });
+      this.setState({ 
+        selectedBedroomNum: item_key,
+        selectedBedroomPrice: item.price  });
       this.requestFlights();
     }
+    // If a flight has been selected
     else if(this.state.current == 2){
       this.setState({ listDataSource: [] });
+      // Display Component States
       this.setState({
         showList: false,
         showSteps:true,
         showInfo: true,
-      })
-      this.setState({showUserForm: true})
-      let book_data = {
+        showPackage: false,
+        showUserForm: true
+      });
+      this.setState({
+        selectedFlightId: item.key,
+        selectedFlightCode: item.code,
+        selectedFlightCompany: item.company_name,
+        selectedFlightDay: item.flight_day,
+        selectedFlightTime: item.depart_time,
+        selectedFlightPrice: item.price,
+      });
        
       };
-
-      this.setState({
-        listDataSource: [...this.state.listDataSource, book_data]
-      });
-
-    }
-
     const value = this.state.current + 1;
     this.setState({ current: value });
   };
@@ -162,6 +199,17 @@ export default class Main extends Component {
     else if(value == 2){
       this.requestFlights()
     }
+    // Show package data
+    else if (value == 3){
+      this.setState({
+        show: true,
+        showList: false,
+        showSteps:true,
+        showInfo: true,
+        showUserForm: true,
+        showPackage: false,
+      });
+    }
   }
 
   onChange = e => {
@@ -171,12 +219,6 @@ export default class Main extends Component {
   handleChangeDestination = value => {
     this.setState({
       destination: value
-    });
-  };
-
-  showBedrooms = hotel_id => {
-    this.setState({
-      bedroomModalVisible: true
     });
   };
 
@@ -198,8 +240,6 @@ export default class Main extends Component {
     this.setState({
       origin: value
     });
-
-    console.log(this.state.origin);
   };
 
   requestHotels = async (destination) => {
@@ -219,8 +259,6 @@ export default class Main extends Component {
           this.setState({
             listDataSource: [...this.state.listDataSource, hotel_data]
           });
-
-          console.log(hotel_data);
         });
       })
       .catch(error => {})
@@ -231,6 +269,7 @@ export default class Main extends Component {
           showSteps:true,
           showInfo: true,
           showUserForm: false,
+          showPackage: false,
         });
       });
   };
@@ -262,8 +301,6 @@ export default class Main extends Component {
             company_name: flight.company.name,
             price: flight.price
           };
-
-          console.log(flight_list)
           this.setState({
             listDataSource: [...this.state.listDataSource, flight_data]
           });
@@ -277,6 +314,7 @@ export default class Main extends Component {
           showList: true,
           showSteps:true,
           showUserForm: false,
+          showPackage: false,
         });
       });
   }
@@ -294,7 +332,6 @@ export default class Main extends Component {
             price: bedroom.price
           };
 
-          console.log(bedroom_data);
           this.setState({
             listDataSource: [...this.state.listDataSource, bedroom_data]
           });
@@ -308,6 +345,7 @@ export default class Main extends Component {
           showSteps:true,
           showInfo: true,
           showUserForm: false,
+          showPackage: false,
         });
       });
   };
@@ -373,7 +411,7 @@ export default class Main extends Component {
             <Button
               type="primary"
               onClick={() =>
-                this.selectedPressed(item.key, item.name)
+                this.selectedPressed(item.key, item)
               }
             > 
               {this.renderButtonName()}
@@ -411,7 +449,7 @@ export default class Main extends Component {
             <Button
               type="primary"
               onClick={() =>
-                this.selectedPressed(item.key, item.name)
+                this.selectedPressed(item.key, item)
               }
             >
               {this.renderButtonName()}
@@ -451,7 +489,7 @@ export default class Main extends Component {
             <Button
               type="primary"
               onClick={() =>
-                this.selectedPressed(item.key, item.name)
+                this.selectedPressed(item.key, item)
               }
             >
               {this.renderButtonName()}
@@ -474,6 +512,36 @@ export default class Main extends Component {
     }
   };
 
+  handleValues = (data) => {
+
+    const value = this.state.current + 1;
+    this.setState({ current: value });
+
+    let name_list=[];
+    let age_list= [];
+    let gender_list=[];
+
+    for(let i = 0; i < this.state.num_guests; i++){
+
+      name_list.push(data[`name${i}`]);
+      age_list.push(data[`age_input${i}`]);
+      gender_list.push(data[`gender${i}`]);
+    }
+
+    this.setState({ listDataSource: [] });
+    this.setState({
+      showList: false,
+      showSteps:true,
+      showInfo: true,
+      showPackage: true,
+      showUserForm: false,
+      guests_age: age_list,
+      guests_name: name_list,
+      guests_gender: gender_list,
+    });
+
+  };
+
   render() {
     return (
       <div id="Page">
@@ -481,7 +549,7 @@ export default class Main extends Component {
           <PageHeader />
 
           <Content id="Main-Container">
-            <div style={{ padding: 0, height: "100%", width: "100%" }}>
+            <div style={{ padding: 0, height: "100%", width: "100%"}}>
               <Col
                 id="Content-Container"
                 type="flex"
@@ -526,7 +594,29 @@ export default class Main extends Component {
                
                 {this.state.showUserForm && (
                   <UserForm
-                  numGuests = {this.state.num_guests}/>
+                  numGuests = {this.state.num_guests}
+                  handleValues = {this.handleValues}
+                  genderPlaceHolder = {this.state.guests_gender}
+                  namePlaceHolder = {this.state.guests_name}
+                  agePlaceHolder = {this.state.guests_age}/>
+                )}
+
+                {this.state.showPackage && (
+                  <PackageDisplay
+                  guestsName= {this.state.guests_name}
+                  guestsAge= {this.state.guests_age}
+                  guestsGender={this.state.guests_gender}
+                  hotelName={this.state.selectedHotelName}
+                  hotelLocation={this.state.destination}
+                  bedroomNumber={this.state.selectedBedroomNum}
+                  bedroomPrice = {this.state.selectedBedroomPrice}
+                  flightCode= {this.state.selectedFlightCode}
+                  flightCompany={this.state.selectedFlightCompany}
+                  flightTime= {this.state.selectedFlightTime}
+                  flightDay = {this.state.selectedFlightDay}
+                  flightPrice = {this.state.selectedFlightPrice}
+                  departureLocation={this.state.origin}
+                  handlePackageConfirmation={this.handlePackageConfirmation}/>
                 )}
 
                 {this.state.showList && (

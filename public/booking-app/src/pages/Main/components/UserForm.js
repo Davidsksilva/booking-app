@@ -12,9 +12,19 @@ class UserForm extends Component {
       guests_count: null,
       guests_name: [],
       guests_gender: [],
-      guests_name: []
+      guests_age: []
     }
   };
+
+  handleSubmit = e => {
+    e.preventDefault();
+    this.props.form.validateFields((err, values) => {
+      if (!err) {
+        this.props.handleValues(values);
+      }
+    });
+  };
+
 
   renderInputs = () => {
     const { getFieldDecorator } = this.props.form;
@@ -44,7 +54,7 @@ class UserForm extends Component {
                     whitespace: true
                   }
                 ]
-              })(<Input />)}
+              })(<Input placeholder ={typeof this.props.namePlaceHolder !== 'undefined' ? this.props.namePlaceHolder[i]: ""}/>)}
             </Form.Item>
           </Col>
           <Col className="Form-Col" span={4}>
@@ -71,7 +81,7 @@ class UserForm extends Component {
                   }
                 ]
               })(
-                <Select size = "default" placeholder="Sexo"  style={{ width: 120 }}>
+                <Select size = "default" placeholder="Sexo" style={{ width: 120 }}>
                   <Option value="Male">Masculino</Option>
                   <Option value="Female">Feminino</Option>
                   <Option value="Other">Outro</Option>
@@ -86,14 +96,7 @@ class UserForm extends Component {
     return inputs;
   };
 
-  handleSubmit = e => {
-    e.preventDefault();
-    this.props.form.validateFieldsAndScroll((err, values) => {
-      if (!err) {
-        console.log("Received values of form: ", values);
-      }
-    });
-  };
+  
 
   handleConfirmBlur = e => {
     const value = e.target.value;

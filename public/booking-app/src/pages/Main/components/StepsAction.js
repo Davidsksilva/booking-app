@@ -4,6 +4,7 @@ import {
     Col,
     Button,
     message,
+    Icon
   } from "antd";
 import "antd/dist/antd.css";
 
@@ -20,12 +21,14 @@ export default class StepsAction extends Component {
         }
         else if(this.props.currentState === 3){
             return "Voltar para Vôos";
-
+        }
+        else if (this.props.currentState === 4){
+            return "Voltar para Dados"
         }
     }
     render() {
         return (
-            <Row>
+            <Row style={{marginTop: "10px"}}>
                 <Col>
                     <div className="steps-action">
                     {this.props.current === this.props.stepLength - 1 && (
@@ -40,9 +43,11 @@ export default class StepsAction extends Component {
                     )}
                     {this.props.currentState > 0 && (
                         <Button
+                        type="default"
                         style={{ marginLeft: 8 }}
                         onClick={() => this.props.prevFunction()}
                         >
+                        <Icon type="left" />
                         {this.renderButtontext()}
                         </Button>
                     )}

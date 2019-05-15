@@ -15,7 +15,8 @@ export default class StepsDisplay extends Component {
             <Step title="Selecionar Hotel" />
             <Step title="Selecionar Quarto" />
             <Step title="Selecionar Vôo" />
-            <Step title="Confirmar Dados" />
+            <Step title="Inserir Dados" />
+            <Step title="Confirmar Pacote" />
             
           </Steps>
          
