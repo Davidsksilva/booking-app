@@ -8,8 +8,8 @@ import {
   Button,
   Icon,
   Alert,
-  Steps,
-  message 
+  message,
+  Rate 
 } from "antd";
 import "antd/dist/antd.css";
 import "./styles.css";
@@ -20,12 +20,12 @@ import UserForm from "./components/UserForm";
 import ListDisplay from "./components/ListDisplay";
 import StepsAction from "./components/StepsAction";
 import StepsDisplay from "./components/StepsDisplay";
-import InfoDisplay from "./components/InfoDisplay";
+//import InfoDisplay from "./components/InfoDisplay";
 import PackageDisplay from "./components/PackageDisplay";
 
 
 const {Content} = Layout;
-const Step = Steps.Step;
+
 const steps = [
   {
     title: "Selecionar Hotel",
@@ -155,6 +155,7 @@ export default class Main extends Component {
       showPackage: false,
       showList: false,
     });
+
     let thisObject = this;
 
     axios.post(`http://localhost:7070/reservas`, {
@@ -200,14 +201,14 @@ handleSearch =  (destination) =>{
     }
 
     // If a room has been selected
-    else if (this.state.current == 1) {
+    else if (this.state.current === 1) {
       this.setState({ 
         selectedBedroomNum: item_key,
         selectedBedroomPrice: item.price  });
       this.requestFlights();
     }
     // If a flight has been selected
-    else if(this.state.current == 2){
+    else if(this.state.current === 2){
       this.setState({ listDataSource: [] });
       // Display Component States
       this.setState({
@@ -235,17 +236,17 @@ handleSearch =  (destination) =>{
     const value = this.state.current - 1;
     this.setState({ current: value });
 
-    if (value == 0) {
+    if (value === 0) {
       this.requestHotels(this.state.destination);
     }
-    else if(value == 1){
+    else if(value === 1){
       this.requestBedrooms(this.state.selectedHotelId);
     }
-    else if(value == 2){
+    else if(value === 2){
       this.requestFlights()
     }
     // Show package data
-    else if (value == 3){
+    else if (value === 3){
       this.setState({
         show: true,
         showList: false,
@@ -304,6 +305,8 @@ handleSearch =  (destination) =>{
           this.setState({
             listDataSource: [...this.state.listDataSource, hotel_data]
           });
+
+          return hotel_data;
         });
       })
       .catch(error => {})
@@ -331,7 +334,7 @@ handleSearch =  (destination) =>{
         let flight_list = response.data._embedded.flightList;
         flight_list.map(flight => {
           let day;
-          if(flight.flight_day == "Monday"){
+          if(flight.flight_day === "Monday"){
             day = "Segunda-Feira"
           }
           else{
@@ -349,7 +352,7 @@ handleSearch =  (destination) =>{
           this.setState({
             listDataSource: [...this.state.listDataSource, flight_data]
           });
-
+          return flight_data;
         });
       })
       .catch(error => {})
@@ -380,6 +383,7 @@ handleSearch =  (destination) =>{
           this.setState({
             listDataSource: [...this.state.listDataSource, bedroom_data]
           });
+          return bedroom_data;
         });
       })
       .catch(error => {})
@@ -423,13 +427,15 @@ handleSearch =  (destination) =>{
         return `Quartos disponíveis em ${this.state.selectedHotelName}`;
       case 2:
         return `Vôos de ${this.state.origin} para ${this.state.destination}`;
+      default:
+        return "Dados";
     }
   };
 
   renderListItemCol = item => {
 
     // Display hotel column data
-    if(this.state.current == 0){
+    if(this.state.current === 0){
       return (
         <Row
           className="Hotel-List-Item-Row"
@@ -445,7 +451,7 @@ handleSearch =  (destination) =>{
             {item.state}
           </Col>
           <Col className="Hotel-List-Item-Col-Stars" spawn={6}>
-            {this.renderStars(item.stars)}
+            <Rate disabled defaultValue={item.stars}/>
           </Col>
           <Col
             className="Hotel-List-Item-Col-Button"
@@ -466,7 +472,7 @@ handleSearch =  (destination) =>{
       );
     }
     // Display bedrooms  column data
-    else if(this.state.current == 1){
+    else if(this.state.current === 1){
 
       return(
         <Row
@@ -504,7 +510,7 @@ handleSearch =  (destination) =>{
       );
     }
     // Display flight column data
-    else if (this.state.current == 2){
+    else if (this.state.current === 2){
       return(
         <Row
           className="Hotel-List-Item-Row"
@@ -554,6 +560,8 @@ handleSearch =  (destination) =>{
         return "Selecionar Quarto";
       case 2:
         return "Selecionar Vôo";
+      default:
+        return "Selecionar";
     }
   };
 
@@ -625,16 +633,18 @@ handleSearch =  (destination) =>{
                 ) : (
                   ""
                 )}
+                {(this.state.showSteps || this.state.showInfo)&& (<div id="Top-Container">
+                  {this.state.showSteps && (
+                    <StepsDisplay
+                    currentStep= {this.state.current}/>
+                  )}
+                
 
-                {this.state.showSteps && (
-                  <StepsDisplay
-                  currentStep= {this.state.current}/>
-                )}
-               
-
-                {this.state.showInfo && (
-                  <InfoDisplay/>
-                )}
+                  {/*this.state.showInfo && (
+                   <InfoDisplay/>
+                  )*/}
+                </div>)}
+              
 
                
                 {this.state.showUserForm && (

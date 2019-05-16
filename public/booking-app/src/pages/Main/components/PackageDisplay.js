@@ -38,7 +38,7 @@ export default class PackageDisplay extends Component {
             >
               {this.props.guestsName.map((name, index) => {
                 return (
-                  <p>
+                  <p key={index}>
                     {name}, {this.props.guestsAge[index]}
                   </p>
                 );

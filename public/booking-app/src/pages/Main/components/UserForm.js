@@ -37,6 +37,7 @@ class UserForm extends Component {
           type="flex"
           justify="center"
           align="middle"
+          key = {i}
           gutter={8}
         >
           <Col className="Form-Col" span={4}>
@@ -81,7 +82,7 @@ class UserForm extends Component {
                   }
                 ]
               })(
-                <Select size = "default" placeholder="Sexo" style={{ width: 120 }}>
+                <Select size = "default" placeholder="Sexo" style={{ width: 150 }}>
                   <Option value="Male">Masculino</Option>
                   <Option value="Female">Feminino</Option>
                   <Option value="Other">Outro</Option>
@@ -104,12 +105,6 @@ class UserForm extends Component {
   };
 
   render() {
-    const { getFieldDecorator } = this.props.form;
-
-    const formItemLayout = {
-      labelCol: { span: 6 },
-      wrapperCol: { span: 14 }
-    };
 
     return (
       <Form

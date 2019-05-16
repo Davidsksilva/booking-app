@@ -1,8 +1,12 @@
 .List-Container{
+    padding: 0 10px;
     align-items: center;
     width: 90%;
     background-color: white;
     height: 62%;
+    -moz-box-shadow:    0 0 5px 2px rgba(0,0,0,.35);
+    -webkit-box-shadow: 0 0 5px 2px rgba(0,0,0,.35);
+    box-shadow: 0 0 5px 2px rgba(0,0,0,.35);
 }
 
 .Card-Container{
@@ -80,9 +84,9 @@
 
 #Steps-Row{
     margin-top: 2%;
-    width: 90%;
+    width: 100%;
     background-color: white;
-    height: 10%;
+    height: 100%;
 }
 
 #Steps-Col{
@@ -139,8 +143,8 @@
 }
 
 #Info-Row{
-    width: 90%;
-    height: 5%;
+    width: 100%;
+    height: 35%;
     background-color: white;
 }
 @media screen and (max-width: 450px){

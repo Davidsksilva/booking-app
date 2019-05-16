@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import{Row, Col, Steps, Divider} from "antd"
+import{Row, Col, Steps} from "antd"
 
 import "antd/dist/antd.css";
 import "./components.css"
