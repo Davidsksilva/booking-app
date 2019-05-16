@@ -77,10 +77,10 @@ export default class Main extends Component {
     origin: "AC",
     error: false,
     show: false,
-    num_guests: 1,
-    guests_name: [],
-    guests_gender: [],
-    guests_age: [],
+    num_clients: 1,
+    clients_name: [],
+    clients_age: [],
+    clients_gender: [],
     showList: false,
     showSteps: false,
     showUserForm: false,
@@ -101,9 +101,9 @@ export default class Main extends Component {
   }
 
   onNumberGuestsChange = (value) =>{
-    this.setState({num_guests: value })
+    this.setState({num_clients: value })
   }
-  handleReload = async () =>{
+  handleReload =  () =>{
     this.setState({
       selectedBedroomNum: null,
       selectedHotelId: null,
@@ -117,36 +117,81 @@ export default class Main extends Component {
       current: 0,
       destination: "AL",
       origin: "AC",
-      num_guests: 1
+      num_clients: 1,
+      clients_age: [],
+      clients_name: [],
+      clients_gender: []
     });
-
-
   }
 
-  handlePackageConfirmation = () =>{
+  postClient = async (client_data, href) =>{
+
+    axios.post(href, {
+      name: client_data.name,
+      age: client_data.age,
+      gender: client_data.gender
+    })
+    .then(function (response){
+
+    })
+    .catch(function (response){
+
+    });
+  }
+
+  postBooking = async (thisObject) =>{
+
+    
+  }
+  handlePackageConfirmation =  () =>{
 
     message.success("Pacote encomendado com sucesso!");
+    
+    this.setState({
+      disableSearch: false,
+      showInfo: false,
+      showUserForm: false,
+      showSteps: false,
+      showPackage: false,
+      showList: false,
+    });
+    let thisObject = this;
+
     axios.post(`http://localhost:7070/reservas`, {
-      hotelId: this.state.selectedHotelId,
-      bedroomNum: this.state.selectedBedroomNum,
-      flightId: this.state.selectedFlightId
+      hotelId: thisObject.state.selectedHotelId,
+      bedroomNum: thisObject.state.selectedBedroomNum,
+      flightId: thisObject.state.selectedFlightId
     })
     .then(function (response) {
       let booking_href = response.data._links.self.href;
+
+      for(let i = 0; i < thisObject.state.num_clients;i++){
+
+        let client_data = {
+          name: thisObject.state.clients_name[i],
+          age: thisObject.state.clients_age[i],
+          gender: thisObject.state.clients_gender[i]
+        }
+        thisObject.postClient(client_data, booking_href);
+      }
     })
     .catch(function (error) {
       console.log(error);
+    })
+    .finally(() =>{
+      this.handleReload();
     });
 
-    this.handleReload();
-  }
-  handleSearch = async (destination) =>{
 
-    this.setState({disableSearch: true})
-    this.requestHotels(destination);
   }
-  
-  selectedPressed = async (item_key, item) => {
+
+handleSearch =  (destination) =>{
+
+  this.setState({disableSearch: true})
+  this.requestHotels(destination);
+}
+
+  selectedPressed = (item_key, item) => {
     // If a hotel has been selected
     if (this.state.current === 0) {
       this.setState({ selectedHotelId: item_key });
@@ -322,7 +367,7 @@ export default class Main extends Component {
   requestBedrooms = async (hotel_id) => {
     this.setState({ listDataSource: [] });
     axios
-      .get(`http://localhost:9090/hoteis/${hotel_id}/quartos?occupation=free&min_beds=${this.state.num_guests}`)
+      .get(`http://localhost:9090/hoteis/${hotel_id}/quartos?occupation=free&min_beds=${this.state.num_clients}`)
       .then(response => {
         let bedroom_list = response.data._embedded.bedroomList;
         bedroom_list.map(bedroom => {
@@ -521,7 +566,7 @@ export default class Main extends Component {
     let age_list= [];
     let gender_list=[];
 
-    for(let i = 0; i < this.state.num_guests; i++){
+    for(let i = 0; i < this.state.num_clients; i++){
 
       name_list.push(data[`name${i}`]);
       age_list.push(data[`age_input${i}`]);
@@ -535,9 +580,9 @@ export default class Main extends Component {
       showInfo: true,
       showPackage: true,
       showUserForm: false,
-      guests_age: age_list,
-      guests_name: name_list,
-      guests_gender: gender_list,
+      clients_age: age_list,
+      clients_name: name_list,
+      clients_gender: gender_list,
     });
 
   };
@@ -594,18 +639,18 @@ export default class Main extends Component {
                
                 {this.state.showUserForm && (
                   <UserForm
-                  numGuests = {this.state.num_guests}
+                  numGuests = {this.state.num_clients}
                   handleValues = {this.handleValues}
-                  genderPlaceHolder = {this.state.guests_gender}
-                  namePlaceHolder = {this.state.guests_name}
-                  agePlaceHolder = {this.state.guests_age}/>
+                  genderPlaceHolder = {this.state.clients_gender}
+                  namePlaceHolder = {this.state.clients_name}
+                  agePlaceHolder = {this.state.clients_age}/>
                 )}
 
                 {this.state.showPackage && (
                   <PackageDisplay
-                  guestsName= {this.state.guests_name}
-                  guestsAge= {this.state.guests_age}
-                  guestsGender={this.state.guests_gender}
+                  guestsName= {this.state.clients_name}
+                  guestsAge= {this.state.clients_age}
+                  guestsGender={this.state.clients_gender}
                   hotelName={this.state.selectedHotelName}
                   hotelLocation={this.state.destination}
                   bedroomNumber={this.state.selectedBedroomNum}

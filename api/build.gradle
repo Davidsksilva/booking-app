@@ -23,8 +23,10 @@ dependencies {
     compile('javax.xml.bind:jaxb-api:2.3.0')
     compile('javax.activation:activation:1.1')
     compile('org.glassfish.jaxb:jaxb-runtime:2.3.0')
+    compile 'org.apache.httpcomponents:httpclient:4.5.8'
     compile("org.springframework.boot:spring-boot-starter-hateoas")
     testCompile("com.jayway.jsonpath:json-path")
+    implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-hateoas'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
