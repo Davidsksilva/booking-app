@@ -5,10 +5,7 @@ import "antd/dist/antd.css";
 import "./components.css";
 
 const { Header} = Layout;
-
 export default class PageHeader extends Component {
- 
-
     render() {
         return (
             <div>
@@ -17,10 +14,10 @@ export default class PageHeader extends Component {
                         id="Menu"
                         theme="dark"
                         mode="horizontal"
-                        defaultSelectedKeys={["1"]}
+                        defaultSelectedKeys={["2"]}
                         style={{ lineHeight: "64px" }}
                     >
-                        <Menu.Item key="1" onClick={this.props.handleBooking}>
+                        <Menu.Item key="1"onClick={this.props.handleBooking}>
                             Booking
                         </Menu.Item>
                         <Menu.Item key="2" onClick={this.props.handleDashboard}>

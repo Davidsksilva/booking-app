@@ -14,6 +14,13 @@
   height: 100%;
   width: 100%;
   display: block;
+}
+
+#Main-Container-Image {
+  padding: 20px 100px;
+  height: 100%;
+  width: 100%;
+  display: block;
   background-position: center; /* Center the image */
   background-repeat: no-repeat; /* Do not repeat the image */
   background-size: cover; /* Resize the background image to cover the entire container */

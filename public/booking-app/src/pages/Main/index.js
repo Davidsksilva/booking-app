@@ -595,11 +595,27 @@ handleSearch =  (destination) =>{
 
   };
 
+  navigateDashboard = () =>{
+    this.props.history.push("/dashboard");
+    document.title = "Dashboard";
+  }
+
+  navigateBooking = () =>{
+    this.props.history.push("/");
+    document.title = "Booking";
+  }
+
+  componentDidMount(){
+    document.title = "Booking";
+  }
+
   render() {
     return (
       <div id="Page">
         <Layout id="Layout">
-          <PageHeader />
+          <PageHeader 
+          handleDashboard = {this.navigateDashboard}
+          handleBooking = {this.navigateBooking}/>
 
           <Content id="Main-Container">
             <div style={{ padding: 0, height: "100%", width: "100%"}}>
