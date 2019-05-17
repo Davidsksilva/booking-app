@@ -1,8 +1,151 @@
+.List-Container{
+    padding: 0 10px;
+    align-items: center;
+    width: 90%;
+    background-color: white;
+    height: 62%;
+    -moz-box-shadow:    0 0 5px 2px rgba(0,0,0,.35);
+    -webkit-box-shadow: 0 0 5px 2px rgba(0,0,0,.35);
+    box-shadow: 0 0 5px 2px rgba(0,0,0,.35);
+}
+
+.Card-Container{
+    -moz-box-shadow:    0 0 5px 2px rgba(0,0,0,.35);
+  -webkit-box-shadow: 0 0 5px 2px rgba(0,0,0,.35);
+  box-shadow: 0 0 5px 2px rgba(0,0,0,.35);
+  width: 300px ;
+  height: 200px;
+  border:  0;
+}
+
+.Package-Container-Row-Text{
+
+    height: 10%;
+    font-weight: 600;
+
+}
+
+.Package-Container-Row-Cards{
+
+    height: 50%;
+}
+
+#List{
+    height: 100%;
+    width: 100%;
+}
 #Header{
     background-color: #1890ff;
 }
-
 #Menu{
     background-color: #1890ff;
     color: white;
 }
+
+.Search-Inner-Container{
+    background-color: white;
+    min-height: 60px;
+    padding: 0 20px;
+    
+}
+
+.Home-Search-Container{
+
+    height: 10%;
+    min-height: 60px;
+    align-items: center;
+    width: 100%;
+    background-color: green;
+    margin: 0 !important;
+}
+.Col-Container{
+    text-align: center;
+    background-color: white;
+    min-height: 60px;
+    line-height: 60px;
+    color: #262626;
+}
+#List-Header{
+    font-weight: 600
+}
+
+#Package-Container{
+    min-height: 60px;
+    line-height: 60px;
+    min-width: 200px;
+    font-weight: 600;
+    border-right: solid;
+    border-width: 2px;
+    border-color: #1890ff;
+    margin-right: 20px; 
+}
+
+#Steps-Row{
+    width: 100%;
+    background-color: white;
+    height: 100%;
+}
+
+#Steps-Col{
+    width: 80%;
+    margin: 0 0;
+    padding: 0 0;
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;     /* Firefox all */
+  -ms-user-select: none;      /* IE 10+ */
+  user-select: none;          /* Likely future */
+}
+
+.Form-Container{
+    min-height: 60px;
+    align-items: center;
+    width: 90%;
+    background-color: white;
+    height: 62%;
+}
+
+.Form-Row{
+    margin-bottom: 10px;
+    width: 100%;
+    height: 10%;
+}
+
+.Form-Col{
+    text-align: start;
+    height: 100%;
+    vertical-align: middle;
+    font-weight: 500;
+}
+.Form-Col:before {
+    content: "";
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+  }
+.Form-Main-Col{
+    height: 100%;
+    width: 100%
+}
+
+#Form{
+    height: 560px
+}
+
+#Package-Data-Container{
+    min-height: 60px;
+    align-items: center;
+    width: 90%;
+    background-color: white;
+    height: 62%;
+}
+
+#Info-Row{
+    width: 100%;
+    height: 35%;
+    background-color: white;
+}
+@media screen and (max-width: 450px){
+    #Package-Container{
+        display: none;
+    }
+  }

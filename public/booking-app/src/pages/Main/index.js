@@ -597,16 +597,13 @@ handleSearch =  (destination) =>{
 
   navigateDashboard = () =>{
     this.props.history.push("/dashboard");
-    document.title = "Dashboard";
   }
 
   navigateBooking = () =>{
     this.props.history.push("/");
-    document.title = "Booking";
   }
 
   componentDidMount(){
-    document.title = "Booking";
   }
 
   render() {

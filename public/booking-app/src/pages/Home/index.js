@@ -54,7 +54,7 @@ export default class index extends Component {
             />
           </Header>
           <Content
-            id = "Content-Container"
+            id = "Home-Content-Container"
           >
             <SearchBox/>
           </Content>

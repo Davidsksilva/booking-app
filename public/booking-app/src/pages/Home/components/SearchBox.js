@@ -49,7 +49,7 @@ export default class SearchBox extends Component {
     render() {
         return (
                 <Row
-                    className="Search-Outter-Container"
+                    className="Home-Search-Container"
                     type="flex"
                     justify="start"
                     gutter={8}
