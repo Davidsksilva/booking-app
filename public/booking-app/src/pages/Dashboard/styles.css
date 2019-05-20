@@ -23,6 +23,9 @@
 
 #Home-Content-Container{
     height: 100%;
-    width: 100%;
     margin: 24px;
+    margin-right: 24px;
+}
+.Col-InfoCard{
+    padding-bottom: 24px;
 }

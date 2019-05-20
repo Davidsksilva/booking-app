@@ -48,8 +48,10 @@ public class ClientController {
         HttpClient   httpClient    = HttpClientBuilder.create().build();
         HttpPost     post          = new HttpPost(postUrl);
         StringEntity postingString = new StringEntity(gson.toJson(object));//gson.tojson() converts your pojo to json
+
         post.setEntity(postingString);
         post.setHeader("Content-Type", "application/json");
+
         HttpResponse  response = httpClient.execute(post);
     }
 
