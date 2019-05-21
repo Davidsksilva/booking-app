@@ -14,9 +14,50 @@ const Mobile = props => <Responsive {...props} maxWidth={767} />;
 const Default = props => <Responsive {...props} minWidth={768} />;
 const { Header, Content, Footer, Sider } = Layout;
 
+const Locations = {
+  Acre: "AC",
+  Alagoas: "AL",
+  Amapá: "AP",
+  Amazonas: "AM",
+  Bahia: "BA",
+  Ceará: "CE",
+  "Distrito Federal": "DF",
+  "Espírito Santo": "ES",
+  Goiás: "GO",
+  Maranhão: "MA",
+  "Mato Grosso": "MT",
+  "Mato Grosso do Sul": "MS",
+  "Minas Gerais": "MG",
+  Pará: "PA",
+  Paraíba: "PB",
+  Paraná: "PR",
+  Pernambuco: "PE",
+  Piauí: "PI",
+  Roraima: "RR",
+  Rondônia: "RO",
+  "Rio de Janeiro": "RJ",
+  "Rio Grande do Norte": "RN",
+  "Rio Grande do Sul": "RS",
+  "Santa Catarina": "SC",
+  "São Paulo": "SP",
+  Sergipe: "SE",
+  Tocantins: "TO"
+};
+
 export default class Dashboard extends Component {
   state = {
-    collapsed: true
+    collapsed: true,
+    onEvents: {
+      click: this.onChartClick,
+      legendselectchanged: this.onChartLegendselectchanged,
+      mouseover: this.onChartClick
+    },
+    selectedCompanyId: -1,
+    selectedCompanyName: "Todos"
+  };
+
+  onChartClick = data => {
+    console.log(data);
   };
 
   toggle = () => {
@@ -35,7 +76,9 @@ export default class Dashboard extends Component {
 
   fetchFlightData = async filter_value => {
     let response = await axios.get(
-      `http://localhost:8080/voos/estatistica?filter=${filter_value}`
+      `http://localhost:8080/voos/estatistica?filter=${filter_value}&company_id=${
+        this.state.selectedCompanyId
+      }`
     );
 
     return await response.data;
@@ -45,7 +88,6 @@ export default class Dashboard extends Component {
     return this.fetchFlightData(filter_value).then(res_data => {
       let dataAxis = [];
 
-      let yMax = 200;
       let dataShadow = [];
       let data = [];
       let flight_statistic_list = [];
@@ -56,6 +98,7 @@ export default class Dashboard extends Component {
         data.push(flight_data.flight_count);
       });
 
+      let yMax = (Math.max(data))*1.2;
       for (let i = 0; i < data.length; i++) {
         dataShadow.push(yMax);
       }
@@ -71,7 +114,6 @@ export default class Dashboard extends Component {
   getFlightOption = filter_value => {
     return this.genFlightData(filter_value).then(bar_data => {
       let { dataAxis, data, dataShadow } = bar_data;
-      console.log(data);
       let option = {
         xAxis: {
           data: dataAxis,
@@ -165,10 +207,12 @@ export default class Dashboard extends Component {
         series: [
           {
             name: "Vôos",
+            selectedMode: "single",
             type: "pie",
             radius: "55%",
             center: ["40%", "50%"],
             data: data.seriesData,
+
             itemStyle: {
               emphasis: {
                 shadowBlur: 10,
@@ -183,7 +227,7 @@ export default class Dashboard extends Component {
     });
   };
 
-  getFlightCompanyOption1 = () => {
+  getFlightCompanyOptionMobile = () => {
     return this.genFlightCompanyData().then(data => {
       let option = {
         tooltip: {
@@ -212,20 +256,53 @@ export default class Dashboard extends Component {
   };
 
   componentDidMount = () => {
+    const brazilJson = require("../../brazil_geo.json");
+    echarts.registerMap("brazil", brazilJson);
+    let optionMap = {
+      geo: [
+        {
+          type: "map",
+          map: "brazil",
+          selectedMode: "single",
+          zoom: 1.2,
+          itemStyle: {
+            areaColor: "#eee",
+            emphasis: {
+              areaColor: "#ffdb5b"
+            }
+          },
+          label: {
+            normal: {
+              show: false,
+              formatter: data => {
+                return data.name;
+              }
+            },
+            emphasis: {
+              show: true
+            }
+          }
+        }
+      ]
+    };
 
-    console.log(echarts.registerMap);
-    let option = this.getFlightCompanyOption().then(option => {
+    this.setState({
+      optionMap: optionMap
+    });
+
+    this.getFlightCompanyOption().then(option => {
       this.setState({
         optionChart1: option
       });
     });
 
-    let option11 = this.getFlightCompanyOption1().then(option => {
+    this.getFlightCompanyOptionMobile().then(option => {
       this.setState({
         optionChart11: option
       });
     });
-    let option2 = this.getFlightOption("destination").then(option => {
+
+    this.getFlightOption("destination").then(option => {
       this.setState({
         optionChart2: option
       });
@@ -245,7 +322,8 @@ export default class Dashboard extends Component {
         legendData.push(company.company_name);
         seriesData.push({
           name: company.company_name,
-          value: company.flight_count
+          value: company.flight_count,
+          id: company.company_id
         });
         selected[company.company_name] = index < 6;
       });
@@ -261,6 +339,29 @@ export default class Dashboard extends Component {
         seriesData: seriesData,
         selected: selected
       };
+    });
+  };
+
+  clickCompanyPie = params => {
+    // Selecting a new company
+    if (this.state.selectedCompanyId != params.data.id) {
+      this.setState({
+        selectedCompanyId: params.data.id,
+        selectedCompanyName: params.data.name
+      });
+    }
+    // Deselect current company
+    else {
+      this.setState({
+        selectedCompanyId: -1,
+        selectedCompanyName: "Todos"
+      });
+    }
+
+    this.getFlightOption("destination").then(option => {
+      this.setState({
+        optionChart2: option
+      });
     });
   };
 
@@ -332,6 +433,9 @@ export default class Dashboard extends Component {
                       <ReactEcharts
                         option={this.state.optionChart1}
                         theme="light"
+                        onEvents={{
+                          click: this.clickCompanyPie
+                        }}
                       />
                     )}
                   </Desktop>
@@ -342,6 +446,9 @@ export default class Dashboard extends Component {
                       <ReactEcharts
                         option={this.state.optionChart11}
                         theme="light"
+                        onEvents={{
+                          click: this.clickCompanyPie
+                        }}
                       />
                     )}
                   </Mobile>
@@ -352,6 +459,9 @@ export default class Dashboard extends Component {
                       <ReactEcharts
                         option={this.state.optionChart11}
                         theme="light"
+                        onEvents={{
+                          click: this.clickCompanyPie
+                        }}
                       />
                     )}
                   </Tablet>
@@ -367,8 +477,8 @@ export default class Dashboard extends Component {
               >
                 <InfoCard
                   bordered={false}
-                  loading={!this.state.optionChart1}
-                  title={"Vôos por destino"}
+                  loading={!this.state.optionChart2}
+                  title={"Vôos por destino - " + this.state.selectedCompanyName}
                   action={
                     <Tooltip title="Soma dos vôos por destino de viagem.">
                       <Icon type="info-circle-o" />
@@ -380,6 +490,41 @@ export default class Dashboard extends Component {
                     <ReactEcharts
                       option={this.state.optionChart2}
                       theme="light"
+                    />
+                  )}
+                </InfoCard>
+              </Col>
+            </Row>
+            <Row gutter={24}>
+              <Col
+                xs={24}
+                sm={24}
+                md={24}
+                lg={12}
+                xl={6}
+                className="Col-InfoCard"
+              >
+                <InfoCard
+                  bordered={false}
+                  loading={!this.state.optionChart1}
+                  title={"Mapa"}
+                  action={
+                    <Tooltip title="Mapa do brasil.">
+                      <Icon type="info-circle-o" />
+                    </Tooltip>
+                  }
+                  contentHeight={350}
+                >
+                  {this.state.optionMap && (
+                    <ReactEcharts
+                      style={{ height: "350px"}}
+                      option={this.state.optionMap}
+                      theme="light"
+                      onEvents={{
+                        click: params => {
+                          console.log(params);
+                        }
+                      }}
                     />
                   )}
                 </InfoCard>
