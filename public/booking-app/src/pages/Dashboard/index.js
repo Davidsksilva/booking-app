@@ -7,6 +7,7 @@ import Responsive from "react-responsive";
 import "./styles.css";
 import InfoCard from "./components/InfoCard";
 import ReactEcharts from "echarts-for-react";
+import { tsImportEqualsDeclaration } from "@babel/types";
 
 const Desktop = props => <Responsive {...props} minWidth={992} />;
 const Tablet = props => <Responsive {...props} minWidth={768} maxWidth={991} />;
@@ -23,7 +24,7 @@ const Locations = {
   Ceará: "CE",
   "Distrito Federal": "DF",
   "Espírito Santo": "ES",
-  Goiás: "GO",
+  Goias: "GO",
   Maranhão: "MA",
   "Mato Grosso": "MT",
   "Mato Grosso do Sul": "MS",
@@ -53,7 +54,8 @@ export default class Dashboard extends Component {
       mouseover: this.onChartClick
     },
     selectedCompanyId: -1,
-    selectedCompanyName: "Todos"
+    selectedCompanyName: "Todos",
+    hotelLocation: "all"
   };
 
   onChartClick = data => {
@@ -66,26 +68,83 @@ export default class Dashboard extends Component {
     });
   };
 
-  fetchFlightCompanyData = async () => {
+  fetchFlightCompanyStatistic = async () => {
     let response = await axios.get(
       `http://localhost:8080/companhias/estatistica`
     );
 
-    return await response.data;
+    return response.data;
   };
 
-  fetchFlightData = async filter_value => {
+  fetchHotelStatistic = async location => {
+    let response = await axios.get(
+      `http://localhost:9090/hoteis/estatistica?location=${location}`
+    );
+
+    return response.data;
+  };
+
+  fetchFlightStatistic = async filter_value => {
     let response = await axios.get(
       `http://localhost:8080/voos/estatistica?filter=${filter_value}&company_id=${
         this.state.selectedCompanyId
       }`
     );
 
-    return await response.data;
+    return response.data;
+  };
+
+  loadHotelStatistic = location => {
+    let location_req;
+    if (location != "all") {
+      location_req = Locations[location];
+    } else {
+      location_req = location;
+    }
+
+    return this.fetchHotelStatistic(location_req).then(res_data => {
+      this.setState({
+        hotelLocation: location,
+        hotelCount: res_data.hotel_count,
+        hotelOccupation: res_data.occupation,
+        bedroomCount: res_data.bedroom_count,
+        occupiedBedroomCount: res_data.occupied_bedroom_count
+      });
+    });
+  };
+
+  getHotelStatisticOption = location => {
+    let location_req;
+    if (location != "all") {
+      location_req = Locations[location];
+    } else {
+      location_req = location;
+    }
+
+    return this.fetchHotelStatistic(location_req).then(res_data => {
+      return {
+        tooltip: {
+          formatter: "{a} <br/>{b} : {c}%"
+        },
+        series: [
+          {
+            name: "occupation-gauge",
+            type: "gauge",
+            detail: { formatter: "{value}%" },
+            data: [
+              {
+                value: res_data.occupation.toFixed(2),
+                name: ""
+              }
+            ]
+          }
+        ]
+      };
+    });
   };
 
   genFlightData = filter_value => {
-    return this.fetchFlightData(filter_value).then(res_data => {
+    return this.fetchFlightStatistic(filter_value).then(res_data => {
       let dataAxis = [];
 
       let dataShadow = [];
@@ -98,7 +157,7 @@ export default class Dashboard extends Component {
         data.push(flight_data.flight_count);
       });
 
-      let yMax = (Math.max(data))*1.2;
+      let yMax = Math.max(data) * 1.2;
       for (let i = 0; i < data.length; i++) {
         dataShadow.push(yMax);
       }
@@ -290,9 +349,17 @@ export default class Dashboard extends Component {
       optionMap: optionMap
     });
 
+    this.loadHotelStatistic(this.state.hotelLocation);
+
     this.getFlightCompanyOption().then(option => {
       this.setState({
         optionChart1: option
+      });
+    });
+
+    this.getHotelStatisticOption(this.state.hotelLocation).then(option => {
+      this.setState({
+        occupationGaugeOption: option
       });
     });
 
@@ -316,7 +383,7 @@ export default class Dashboard extends Component {
 
     let company_statistic_list = [];
 
-    return this.fetchFlightCompanyData().then(data => {
+    return this.fetchFlightCompanyStatistic().then(data => {
       company_statistic_list = data;
       company_statistic_list.map((company, index) => {
         legendData.push(company.company_name);
@@ -342,6 +409,42 @@ export default class Dashboard extends Component {
     });
   };
 
+  geoClick = params =>{
+
+    console.log(params);
+    console.log(this.state.lastclickedRegion === params.name);
+    let location_name;
+    if(this.state.lastclickedRegion === params.name){
+      location_name = "all";
+    }
+    else{
+      location_name = params.name;
+    }
+
+    this.getHotelStatisticOption(location_name).then(option => {
+      this.setState({
+        occupationGaugeOption: option
+      });
+    });
+
+    this.loadHotelStatistic(location_name);
+
+    this.setState({
+      lastclickedRegion: params.name,
+    })
+
+  }
+
+  geoUnselected = params =>{
+    this.getHotelStatisticOption("all").then(option => {
+      this.setState({
+        occupationGaugeOption: option
+      });
+    });
+
+    this.loadHotelStatistic("all");
+  }
+
   clickCompanyPie = params => {
     // Selecting a new company
     if (this.state.selectedCompanyId != params.data.id) {
@@ -363,6 +466,7 @@ export default class Dashboard extends Component {
         optionChart2: option
       });
     });
+
   };
 
   render() {
@@ -517,14 +621,73 @@ export default class Dashboard extends Component {
                 >
                   {this.state.optionMap && (
                     <ReactEcharts
-                      style={{ height: "350px"}}
+                      style={{ height: "350px" }}
                       option={this.state.optionMap}
                       theme="light"
                       onEvents={{
-                        click: params => {
-                          console.log(params);
-                        }
+                        click: this.geoClick,
                       }}
+                    />
+                  )}
+                </InfoCard>
+              </Col>
+              <Col
+                xs={24}
+                sm={24}
+                md={24}
+                lg={12}
+                xl={6}
+                className="Col-InfoCard"
+              >
+                <InfoCard
+                  bordered={false}
+                  loading={!this.state.hotelCount}
+                  title={
+                    "Hotéis Disponíveis - " +
+                    (this.state.hotelLocation == "all"
+                      ? "Brasil"
+                      : this.state.hotelLocation)
+                  }
+                  action={
+                    <Tooltip title="Quantidade de Hotéis Disponíveis">
+                      <Icon type="info-circle-o" />
+                    </Tooltip>
+                  }
+                  footer={"Quartos Disponíveis"}
+                  footerTotal={this.state.bedroomCount}
+                  total={this.state.hotelCount}
+                  contentHeight={350}
+                />{" "}
+              </Col>
+              <Col
+                xs={24}
+                sm={24}
+                md={24}
+                lg={24}
+                xl={12}
+                className="Col-InfoCard"
+              >
+                <InfoCard
+                  bordered={false}
+                  loading={!this.state.hotelCount}
+                  title={
+                    "Taxa de Ocupação - " +
+                    (this.state.hotelLocation == "all"
+                      ? "Brasil"
+                      : this.state.hotelLocation)
+                  }
+                  action={
+                    <Tooltip title="Taxa de ocupação dos quartos.">
+                      <Icon type="info-circle-o" />
+                    </Tooltip>
+                  }
+                  contentHeight={350}
+                >
+                  {this.state.occupationGaugeOption && (
+                    <ReactEcharts
+                      style={{ height: "350px", width: "100%" }}
+                      option={this.state.occupationGaugeOption}
+                      theme="light"
                     />
                   )}
                 </InfoCard>

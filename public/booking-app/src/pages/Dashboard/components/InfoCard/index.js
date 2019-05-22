@@ -7,7 +7,7 @@ import "./index.css"
 export default class InfoCard extends Component {
 
     renderCardContent = () =>{
-        const { title, action, children, loading, footer, avatar, total, contentHeight } = this.props;
+        const { title, action, children, loading, footer, avatar, total, contentHeight, footerTotal } = this.props;
 
         if(loading){
             return false;
@@ -23,8 +23,8 @@ export default class InfoCard extends Component {
                   <div className={"meta"}>
                     <span className={"title"}>{title}</span>
                     <span className={"action"}>{action}</span>
-                  </div>
-                  {total}
+                  </div >
+                  <div className={"total"}>{total}</div>
                 </div>
               </div>
               {children && (
@@ -37,7 +37,7 @@ export default class InfoCard extends Component {
                   className={"footerMargin"}
                 >
                 <Divider/>
-                  {footer}
+                  {footer}<span className="footerTotal">{footerTotal}</span>
                 </div>
               )}
             </div>
