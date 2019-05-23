@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { Layout, Menu, Icon, Row, Col, Tooltip } from "antd";
 import axios from "axios";
 import echarts from "echarts";
-import MediaQuery from "react-responsive";
 import Responsive from "react-responsive";
 import "./styles.css";
 import InfoCard from "./components/InfoCard";
@@ -84,6 +83,14 @@ export default class Dashboard extends Component {
     return response.data;
   };
 
+  fetchHotelGuestsStatistic = async location => {
+    let response = await axios.get(
+      `http://localhost:9090/hospedes/estatistica?location=${location}`
+    );
+
+    return response.data;
+  };
+
   fetchFlightStatistic = async filter_value => {
     let response = await axios.get(
       `http://localhost:8080/voos/estatistica?filter=${filter_value}&company_id=${
@@ -108,7 +115,9 @@ export default class Dashboard extends Component {
         hotelCount: res_data.hotel_count,
         hotelOccupation: res_data.occupation,
         bedroomCount: res_data.bedroom_count,
-        occupiedBedroomCount: res_data.occupied_bedroom_count
+        occupiedBedroomCount: res_data.occupied_bedroom_count,
+        avgBedroomPrice: res_data.average_price.toFixed(2),
+        sumRevenue: res_data.revenue
       });
     });
   };
@@ -143,6 +152,29 @@ export default class Dashboard extends Component {
     });
   };
 
+  genHotelGuestData = location => {
+    let location_req;
+    if (location != "all") {
+      location_req = Locations[location];
+    } else {
+      location_req = location;
+    }
+
+    return this.fetchHotelGuestsStatistic(location_req).then(res_data => {
+      let data = [];
+      let legendData = [];
+
+      data.push({ value: res_data.gender_other_count, name: "Outro" });
+      legendData.push("Outro");
+      data.push({ value: res_data.gender_male_count, name: "Masculino" });
+      legendData.push("Masculino");
+      data.push({ value: res_data.gender_female_count, name: "Feminino" });
+      legendData.push("Feminino");
+
+      return { data, legendData };
+    });
+  };
+
   genFlightData = filter_value => {
     return this.fetchFlightStatistic(filter_value).then(res_data => {
       let dataAxis = [];
@@ -158,6 +190,7 @@ export default class Dashboard extends Component {
       });
 
       let yMax = Math.max(data) * 1.2;
+
       for (let i = 0; i < data.length; i++) {
         dataShadow.push(yMax);
       }
@@ -167,6 +200,54 @@ export default class Dashboard extends Component {
         data: data,
         dataShadow: dataShadow
       };
+    });
+  };
+
+  getHotelGuestsOption = location => {
+    return this.genHotelGuestData(location).then(params => {
+      let { data, legendData } = params;
+
+      let option = {
+        tooltip: {
+          trigger: "item",
+          formatter: "{a} <br/>{b}: {c} ({d}%)"
+        },
+        legend: {
+          orient: "vertical",
+          x: "right",
+          data: legendData
+        },
+        series: [
+          {
+            name: "genero-hospedes",
+            type: "pie",
+            radius: ["50%", "70%"],
+            avoidLabelOverlap: false,
+            label: {
+              normal: {
+                show: false,
+                position: "center",
+                formatter: "{b} ({d}%)"
+              },
+              emphasis: {
+                show: true,
+                textStyle: {
+                  fontSize: "15",
+                  fontWeight: "bold"
+                }
+              }
+            },
+            labelLine: {
+              normal: {
+                show: false
+              }
+            },
+            data: data
+          }
+        ]
+      };
+
+      return option;
     });
   };
 
@@ -256,9 +337,7 @@ export default class Dashboard extends Component {
         legend: {
           type: "scroll",
           orient: "vertical",
-          right: 10,
-          top: 20,
-          bottom: 20,
+          x: "right",
           data: data.legendData,
 
           selected: data.selected
@@ -349,6 +428,12 @@ export default class Dashboard extends Component {
       optionMap: optionMap
     });
 
+    this.getHotelGuestsOption(this.state.hotelLocation).then(option => {
+      this.setState({
+        optionHotelGenderDoughnut: option
+      });
+    });
+
     this.loadHotelStatistic(this.state.hotelLocation);
 
     this.getFlightCompanyOption().then(option => {
@@ -409,17 +494,22 @@ export default class Dashboard extends Component {
     });
   };
 
-  geoClick = params =>{
-
+  geoClick = params => {
     console.log(params);
     console.log(this.state.lastclickedRegion === params.name);
     let location_name;
-    if(this.state.lastclickedRegion === params.name){
+    if (this.state.lastclickedRegion === params.name) {
       location_name = "all";
-    }
-    else{
+    } else {
       location_name = params.name;
     }
+
+
+    this.getHotelGuestsOption(location_name).then(option => {
+      this.setState({
+        optionHotelGenderDoughnut: option
+      });
+    });
 
     this.getHotelStatisticOption(location_name).then(option => {
       this.setState({
@@ -429,13 +519,13 @@ export default class Dashboard extends Component {
 
     this.loadHotelStatistic(location_name);
 
+
     this.setState({
-      lastclickedRegion: params.name,
-    })
+      lastclickedRegion: params.name
+    });
+  };
 
-  }
-
-  geoUnselected = params =>{
+  geoUnselected = params => {
     this.getHotelStatisticOption("all").then(option => {
       this.setState({
         occupationGaugeOption: option
@@ -443,7 +533,7 @@ export default class Dashboard extends Component {
     });
 
     this.loadHotelStatistic("all");
-  }
+  };
 
   clickCompanyPie = params => {
     // Selecting a new company
@@ -466,7 +556,6 @@ export default class Dashboard extends Component {
         optionChart2: option
       });
     });
-
   };
 
   render() {
@@ -536,7 +625,7 @@ export default class Dashboard extends Component {
                     {this.state.optionChart1 && (
                       <ReactEcharts
                         option={this.state.optionChart1}
-                        theme="light"
+                        theme="default"
                         onEvents={{
                           click: this.clickCompanyPie
                         }}
@@ -549,7 +638,7 @@ export default class Dashboard extends Component {
                     {this.state.optionChart11 && (
                       <ReactEcharts
                         option={this.state.optionChart11}
-                        theme="light"
+                        theme="default"
                         onEvents={{
                           click: this.clickCompanyPie
                         }}
@@ -562,7 +651,7 @@ export default class Dashboard extends Component {
                     {this.state.optionChart11 && (
                       <ReactEcharts
                         option={this.state.optionChart11}
-                        theme="light"
+                        theme="default"
                         onEvents={{
                           click: this.clickCompanyPie
                         }}
@@ -582,7 +671,7 @@ export default class Dashboard extends Component {
                 <InfoCard
                   bordered={false}
                   loading={!this.state.optionChart2}
-                  title={"Vôos por destino - " + this.state.selectedCompanyName}
+                  title={"Vôos por Destino - " + this.state.selectedCompanyName}
                   action={
                     <Tooltip title="Soma dos vôos por destino de viagem.">
                       <Icon type="info-circle-o" />
@@ -593,7 +682,7 @@ export default class Dashboard extends Component {
                   {this.state.optionChart2 && (
                     <ReactEcharts
                       option={this.state.optionChart2}
-                      theme="light"
+                      theme="default"
                     />
                   )}
                 </InfoCard>
@@ -623,9 +712,9 @@ export default class Dashboard extends Component {
                     <ReactEcharts
                       style={{ height: "350px" }}
                       option={this.state.optionMap}
-                      theme="light"
+                      theme="default"
                       onEvents={{
-                        click: this.geoClick,
+                        click: this.geoClick
                       }}
                     />
                   )}
@@ -656,8 +745,29 @@ export default class Dashboard extends Component {
                   footer={"Quartos Disponíveis"}
                   footerTotal={this.state.bedroomCount}
                   total={this.state.hotelCount}
-                  contentHeight={350}
-                />{" "}
+                  contentHeight={39}
+                >{" "}</InfoCard>
+                <div style={{ marginTop: "24px" }}>
+                  <InfoCard
+                    bordered={false}
+                    loading={!this.state.avgBedroomPrice}
+                    title={
+                      "Faturamento dos Hotéis - " +
+                      (this.state.hotelLocation == "all"
+                        ? "Brasil"
+                        : this.state.hotelLocation)
+                    }
+                    action={
+                      <Tooltip title="Faturamento pelo aluguel de quartos.">
+                        <Icon type="info-circle-o" />
+                      </Tooltip>
+                    }
+                    footer={"Preço Médio dos Quartos"}
+                    footerTotal={this.state.avgBedroomPrice}
+                    total= {"R$ " + this.state.sumRevenue +",00"}
+                    contentHeight={39}
+                  >{" "}</InfoCard>
+                </div>
               </Col>
               <Col
                 xs={24}
@@ -687,7 +797,42 @@ export default class Dashboard extends Component {
                     <ReactEcharts
                       style={{ height: "350px", width: "100%" }}
                       option={this.state.occupationGaugeOption}
-                      theme="light"
+                      theme="default"
+                    />
+                  )}
+                </InfoCard>
+              </Col>
+            </Row>
+            <Row gutter={24}>
+              <Col
+                xs={24}
+                sm={24}
+                md={12}
+                lg={12}
+                xl={8}
+                className="Col-InfoCard"
+              >
+                <InfoCard
+                  bordered={false}
+                  loading={!this.state.optionHotelGenderDoughnut}
+                  title={
+                    "Gênero dos Hóspedes - " +
+                    (this.state.hotelLocation == "all"
+                      ? "Brasil"
+                      : this.state.hotelLocation)
+                  }
+                  action={
+                    <Tooltip title="Número de hóspedes por gênero.">
+                      <Icon type="info-circle-o" />
+                    </Tooltip>
+                  }
+                  contentHeight={350}
+                >
+                  {this.state.optionHotelGenderDoughnut && (
+                    <ReactEcharts
+                      style={{ height: "350px" }}
+                      option={this.state.optionHotelGenderDoughnut}
+                      theme="default"
                     />
                   )}
                 </InfoCard>
