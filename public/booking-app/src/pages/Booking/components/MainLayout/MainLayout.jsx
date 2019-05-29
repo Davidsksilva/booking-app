@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import { Layout, Menu, Icon } from "antd";
-import  "./styles.css"
 
-import SearchBox from "./components/SearchBox"
+import "antd/dist/antd.css";
+import "./MainLayout.css";
 
 const { Header, Content, Footer, Sider } = Layout;
 
-export default class index extends Component {
+export default class MainLayout extends Component {
   state = {
     collapsed: true
   };
@@ -19,21 +19,26 @@ export default class index extends Component {
 
   render() {
     return (
-      <Layout id = "Layout">
+      <Layout id="Layout">
         <Sider
           breakpoint="lg"
           trigger={null}
           collapsible
-          id = "Sider"
+          id="Sider"
           collapsed={this.state.collapsed}
           onBreakpoint={broken => {
             this.setState({
-                collapsed: !this.state.collapsed
-              });
+              collapsed: !this.state.collapsed
+            });
           }}
         >
           <div className="logo" />
-          <Menu theme="dark" mode="inline" defaultSelectedKeys={["1"]} id="Sider-Menu">
+          <Menu
+            theme="dark"
+            mode="inline"
+            defaultSelectedKeys={["1"]}
+            id="Sider-Menu"
+          >
             <Menu.Item key="1">
               <Icon type="form" />
               <span>Booking</span>
@@ -45,18 +50,16 @@ export default class index extends Component {
           </Menu>
         </Sider>
         <Layout>
-          <Header style={{ background: "#fff",  }}>
+          <Header style={{ background: "#fff" }}>
             <Icon
               className="trigger"
-                style={{fontSize: "24px", textAlign: "center"}}
+              style={{ fontSize: "24px", textAlign: "center" }}
               type={this.state.collapsed ? "menu-unfold" : "menu-fold"}
               onClick={this.toggle}
             />
           </Header>
-          <Content
-            id = "Home-Content-Container"
-          >
-            <SearchBox/>
+          <Content id="Home-Content-Container">
+            {this.props.children}
           </Content>
         </Layout>
       </Layout>
