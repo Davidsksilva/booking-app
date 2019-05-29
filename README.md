@@ -27,7 +27,18 @@ Para o funcionamento completo da aplicação é necessário a execução do back
 Para subir o container contento o banco de dados:
 
 ```bash
+cd /database/
 docker-compose up -d
+```
+
+Na primeira execução será necessário criar o banco de dados das aplicações, para isto é preciso acessar o mysql dentro do docker:
+
+```bash
+docker exec -it database_db_1 bash
+mysql
+create database db_hotel;
+create database db_flight;
+create database db_booking;
 ```
 
 Para a execução do back-end:
