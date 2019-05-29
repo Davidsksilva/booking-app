@@ -16,24 +16,33 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RestController
 public class BookingController {
 
-    private final BookingRepository booking_repo;
-    private final BookingResourceAssembler booking_assembler;
+    private final BookingRepository bookingRepository;
+    private final BookingResourceAssembler bookingResourceAssembler;
 
-    BookingController(BookingRepository booking_repo, BookingResourceAssembler booking_assembler){
-        this.booking_repo = booking_repo;
-        this.booking_assembler = booking_assembler;
+    /**
+     *
+     * @param bookingRepository
+     * @param bookingResourceAssembler
+     */
+    BookingController(BookingRepository bookingRepository, BookingResourceAssembler bookingResourceAssembler){
+        this.bookingRepository = bookingRepository;
+        this.bookingResourceAssembler = bookingResourceAssembler;
     }
 
+    /**
+     *
+     * @return
+     */
     @GetMapping (value = "/reservas", produces = "application/json; charset=UTF-8")
     public Resources<Resource<Booking>> allBookings (){
 
         List<Resource<Booking>> bookings_resource;
         List<Booking> bookings;
 
-        bookings = booking_repo.findAll();
+        bookings = bookingRepository.findAll();
 
         bookings_resource = bookings.stream()
-                .map(booking_assembler::toResource)
+                .map(bookingResourceAssembler::toResource)
                 .collect(Collectors.toList());
 
         return new Resources<>(bookings_resource,
@@ -41,21 +50,30 @@ public class BookingController {
 
     }
 
-    // Select Booking
-    @GetMapping(value = "/reservas/{id_booking}", produces = "application/json; charset=UTF-8")
-    Resource<Booking> oneBooking (@PathVariable Long id_booking){
+    /**
+     * Select Booking
+     * @param idBooking
+     * @return
+     */
+    @GetMapping(value = "/reservas/{idBooking}", produces = "application/json; charset=UTF-8")
+    Resource<Booking> oneBooking (@PathVariable Long idBooking){
 
-        Booking booking = booking_repo.findById(id_booking)
-                .orElseThrow(() -> new BookingNotFoundException(id_booking));
+        Booking booking = bookingRepository.findById(idBooking)
+                .orElseThrow(() -> new BookingNotFoundException(idBooking));
 
-        return booking_assembler.toResource(booking);
+        return bookingResourceAssembler.toResource(booking);
     }
 
-    // Create Booking
+    /**
+     *  Create Booking
+     * @param newBooking
+     * @return
+     * @throws URISyntaxException
+     */
     @PostMapping("/reservas")
     ResponseEntity<?> newBooking(@RequestBody Booking newBooking) throws URISyntaxException{
 
-        Resource<Booking> resource = booking_assembler.toResource(booking_repo.save(newBooking));
+        Resource<Booking> resource = bookingResourceAssembler.toResource(bookingRepository.save(newBooking));
 
         return ResponseEntity
                 .created(new URI(resource.getId().expand().getHref()))
@@ -63,10 +81,14 @@ public class BookingController {
     }
 
 
-    // Delete Booking by Id
+    /**
+     * Delete Booking by Id
+     * @param id_booking
+     * @return
+     */
     @DeleteMapping(value = "/reservas/{id_booking}", produces = "application/json; charset=UTF-8")
     ResponseEntity<?> deleteBooking(@PathVariable Long id_booking){
-        booking_repo.deleteById(id_booking);
+        bookingRepository.deleteById(id_booking);
 
         return ResponseEntity.noContent().build();
     }

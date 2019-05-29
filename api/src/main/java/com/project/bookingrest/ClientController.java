@@ -11,7 +11,6 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -25,16 +24,30 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RestController
 public class ClientController {
 
-    private final ClientRepository client_repo;
-    private final BookingRepository booking_repo;
+    private final ClientRepository clientRepository;
+    private final BookingRepository bookingRepository;
 
-    private final ClientResourceAssembler client_assembler;
-    ClientController(ClientRepository client_repo, BookingRepository booking_repo, ClientResourceAssembler client_assembler){
-        this.client_repo = client_repo;
-        this.booking_repo =booking_repo;
-        this.client_assembler = client_assembler;
+    private final ClientResourceAssembler clientResourceAssembler;
+
+    /**
+     *
+     * @param clientRepository
+     * @param bookingRepository
+     * @param clientResourceAssembler
+     */
+    ClientController(ClientRepository clientRepository, BookingRepository bookingRepository, ClientResourceAssembler clientResourceAssembler){
+        this.clientRepository = clientRepository;
+        this.bookingRepository = bookingRepository;
+        this.clientResourceAssembler = clientResourceAssembler;
     }
 
+    /**
+     *
+     * @param client
+     * @param hotelId
+     * @param bedroomNum
+     * @throws IOException
+     */
     private void postClientToHotel(Client client, Long hotelId, int bedroomNum) throws IOException {
 
         String       postUrl       = "http://localhost:9090/hotel/" + hotelId + "/quartos/" + bedroomNum;// put in your url
@@ -43,6 +56,13 @@ public class ClientController {
 
     }
 
+    /**
+     *
+     * @param postUrl
+     * @param object
+     * @param <T>
+     * @throws IOException
+     */
     private <T> void sendPost(String postUrl, T object) throws  IOException{
         Gson         gson          = new Gson();
         HttpClient   httpClient    = HttpClientBuilder.create().build();
@@ -55,6 +75,12 @@ public class ClientController {
         HttpResponse  response = httpClient.execute(post);
     }
 
+    /**
+     *
+     * @param client
+     * @param flightId
+     * @throws IOException
+     */
     private void postClientToFlight(Client client, Long flightId) throws IOException{
 
         String       postUrl       = "http://localhost:8080/voos/" + flightId;// put in your url
@@ -62,36 +88,52 @@ public class ClientController {
         sendPost(postUrl, client);
     }
 
+    /**
+     *
+     * @return
+     */
     @GetMapping(value = "/clientes", produces = "application/json; charset=UTF-8")
     public Resources<Resource<Client>> allClients (){
         List<Resource<Client>> clients_resource;
         List<Client> clients;
 
-        clients = client_repo.findAll();
+        clients = clientRepository.findAll();
         clients_resource = clients.stream()
-                .map(client_assembler::toResource)
+                .map(clientResourceAssembler::toResource)
                 .collect(Collectors.toList());
         return new Resources<>(clients_resource,
                 linkTo(methodOn(ClientController.class).allClients()).withSelfRel());
     }
 
-    @GetMapping(value = "/clientes/{id_client}", produces = "application/json; charset=UTF-8")
-    public Resource<Client> oneClient (@PathVariable Long id_client){
-        Client client = client_repo.findById(id_client)
-                .orElseThrow(() -> new ClientNotFoundException(id_client));
+    /**
+     *
+     * @param idClient
+     * @return
+     */
+    @GetMapping(value = "/clientes/{idClient}", produces = "application/json; charset=UTF-8")
+    public Resource<Client> oneClient (@PathVariable Long idClient){
+        Client client = clientRepository.findById(idClient)
+                .orElseThrow(() -> new ClientNotFoundException(idClient));
 
-        return client_assembler.toResource(client);
+        return clientResourceAssembler.toResource(client);
     }
 
-    // Create Booking
-    @PostMapping("/reservas/{id_booking}")
-    ResponseEntity<?> newClientWithBooking(@RequestBody Client newClient,@PathVariable Long id_booking) throws URISyntaxException, IOException {
+    /**
+     * Create Booking
+     * @param newClient
+     * @param idBooking
+     * @return
+     * @throws URISyntaxException
+     * @throws IOException
+     */
+    @PostMapping("/reservas/{idBooking}")
+    ResponseEntity<?> newClientWithBooking(@RequestBody Client newClient,@PathVariable Long idBooking) throws URISyntaxException, IOException {
 
-        Booking booking = booking_repo.findById(id_booking)
-                .orElseThrow(() -> new BookingNotFoundException(id_booking));
+        Booking booking = bookingRepository.findById(idBooking)
+                .orElseThrow(() -> new BookingNotFoundException(idBooking));
 
         newClient.setBooking(booking);
-        Resource<Client> resource = client_assembler.toResource(client_repo.save(newClient));
+        Resource<Client> resource = clientResourceAssembler.toResource(clientRepository.save(newClient));
 
         postClientToHotel(newClient, booking.getHotelId(), booking.getBedroomNum());
         postClientToFlight(newClient, booking.getFlightId());
