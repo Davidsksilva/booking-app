@@ -1,37 +1,34 @@
-# [TP] Travel App
+# [TBA] Travel Booking App
 
-Parte do projeto Travel Package (TP), inclui o front-end para a realização de novas reservas, back-end para registro das reservas e front-end para a dashboard de estatísticas sobre hotéis, vôos e reservas.
+Part of the projet Travel Booking  App (TBA), includes a frontend to handle bookings, a backend to register the bookings to a database and a dashboard frontend displaying some stats about the bookings.
 
-**Travel Package (TP):** constitui de um projeto de teste de familiarização com a tecnologia [Spring](https://spring.io/) e [React](https://reactjs.org/). Onde o usuário poderá fazer uma reserva de um pacote de viagem (Vôo + Quarto de Hotel) através de uma página em React, consumindo e alimentando as API's REST de Reserva (armazena o pacote), Vôos (armazena os vôos) e Hotéis (armazena os hotéis) utilizando um banco de dados [MySQL](https://www.mysql.com/). Também é fornecida uma Dashboard  que exibe estatísticas.
-
-
+**Travel Booking App (TBA):** constitutes a project to gain familiarity with the tecnology stack [Spring](https://spring.io/) and [React](https://reactjs.org/). Where the user is able to book a travel package including Flight and Hotel room from a web page grown with React, consuming and feeding multiple REST API's, utilizing the [MySQL](https://www.mysql.com/) relational database. Includes a dashboard page using [ECharts](https://echarts.baidu.com/).
 
 ![diagram](./diagram.png)
 
 ## Getting Started
 
-A seguir serão listadas as informações necessárias para a execução do projeto.
+To run te project, follow the next steps.
 
 ### Prerequisites
 
-Pré-requisitos necessários para a execução do projeto:
+Prerequisites to run the project:
 
 - Gradle 4.10.2;
 - Java 11;
 - Docker 18.X;
 
-Para o funcionamento completo da aplicação é necessário a execução do back-end dos [Vôos](https://github.com/Davidsksilva/Flight-Rest) e [Hotéis](https://github.com/Davidsksilva/Hotel-Rest).
+To enable 100% of the functionality of the application, its necessary to run the [Flight](https://github.com/Davidsksilva/Flight-Rest) and [Hotel](https://github.com/Davidsksilva/Hotel-Rest) backends.
 
 ### Executing
 
-Para subir o container contento o banco de dados:
+To run the docker container with the database:
 
 ```bash
 cd /database/
 docker-compose up -d
 ```
-
-Na primeira execução será necessário criar o banco de dados das aplicações, para isto é preciso acessar o mysql dentro do docker:
+On the first run, its necessary to create the tables on the database:
 
 ```bash
 docker exec -it database_db_1 bash
@@ -40,15 +37,14 @@ create database db_hotel;
 create database db_flight;
 create database db_booking;
 ```
-
-Para a execução do back-end:
+To run the backend:
 
 ```bash
 cd /api/
 ./gradlew bootRun
 ```
 
-Para a execução do front-end:
+To run the frontend:
 
 ```bash
 cd /public/booking-app
