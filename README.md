@@ -6,6 +6,12 @@ Part of the projet Travel Booking  App (TBA), includes a frontend to handle book
 
 ![diagram](./diagram.png)
 
+## Demo
+
+![diagram](./booking.gif)
+
+![diagram](./dashboard.gif)
+
 ## Getting Started
 
 To run te project, follow the next steps.
